@@ -1,0 +1,52 @@
+# Sajter som Tidskoll blockerar när blocket är påslaget. En domän per rad,
+# # är kommentar. www. och m. läggs till automatiskt; andra underdomäner
+# (till exempel music.youtube.com) måste stå på egen rad.
+#
+# Sätt # framför det du inte vill blockera. Kör sedan "blockera.sh pa" igen.
+
+# Video
+youtube.com
+youtu.be
+music.youtube.com
+youtube-nocookie.com
+twitch.tv
+
+# Sociala medier
+instagram.com
+facebook.com
+tiktok.com
+x.com
+twitter.com
+mobile.x.com
+mobile.twitter.com
+snapchat.com
+pinterest.com
+se.pinterest.com
+threads.net
+
+# Forum
+reddit.com
+old.reddit.com
+new.reddit.com
+flashback.org
+9gag.com
+imgur.com
+i.imgur.com
+quora.com
+news.ycombinator.com
+
+# Nyheter
+aftonbladet.se
+sportbladet.se
+expressen.se
+dn.se
+svd.se
+svt.se
+svtplay.se
+omni.se
+gp.se
+sydsvenskan.se
+di.se
+breakit.se
+tv4.se
+tv4play.se

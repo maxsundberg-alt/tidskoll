@@ -2,10 +2,12 @@
 # Tidskoll — installation och styrning (macOS). Går att köra om, inget dubbleras.
 #
 #   bash installera.sh bas [--kategorier]   ActivityWatch, webbläsarbevakaren, veckorapporten
-#                                           och Claude-skillen. --kategorier ersätter
+#                                           och skillen tidskoll. --kategorier ersätter
 #                                           ActivityWatchs kategorier med startindelningen.
 #   bash installera.sh skarm [--bygg-om]    skärmdumpar var femte sekund (valfri nivå)
-#   bash installera.sh nattanalys           Claude analyserar dagens skärmdumpar 23:30 (valfri)
+#   bash installera.sh nattanalys           en AI-agent analyserar dagens skärmdumpar 23:30 (valfri)
+#   bash installera.sh blockera             blockering av sajter i alla webbläsare (valfri,
+#                                           slås på separat med ~/tidskoll/bin/blockera.sh pa)
 #   bash installera.sh status               vad som körs, och dagens data
 #   bash installera.sh paus | fortsatt      stoppa eller starta skärmdumparna
 #   bash installera.sh avinstallera         ta bort allt utom din data
@@ -16,7 +18,8 @@ ROOT="$HOME/tidskoll"
 BIN="$ROOT/bin"
 AGENTS="$HOME/Library/LaunchAgents"
 APP="$HOME/Applications/Tidskoll.app"
-SKILL_DIR="$HOME/.claude/skills/tidskoll"
+# ~/.agents/skills är standardmappen (Codex, Cursor, Gemini CLI m.fl.), ~/.claude/skills är Claude Codes.
+SKILL_DIRS=("$HOME/.claude/skills/tidskoll" "$HOME/.agents/skills/tidskoll")
 GUI="gui/$(id -u)"
 
 say()  { printf '%s\n' "$*"; }
@@ -73,10 +76,13 @@ cmd_bas() {
   load_agent com.tidskoll.webblasare
   load_agent com.tidskoll.veckorapport
 
-  # 4. Claude-skillen
-  mkdir -p "$SKILL_DIR"
-  cp "$SRC/skill/tidskoll/SKILL.md" "$SKILL_DIR/SKILL.md"
-  ok "skillen /tidskoll i $SKILL_DIR"
+  # 4. Skillen
+  for d in "${SKILL_DIRS[@]}"; do
+    mkdir -p "$d" && cp "$SRC/skill/tidskoll/SKILL.md" "$d/SKILL.md"
+  done
+  # Samma instruktioner som vanlig fil, för agenter som inte läser skills.
+  cp "$SRC/skill/tidskoll/SKILL.md" "$ROOT/SKILL.md"
+  ok "skillen tidskoll i ~/.claude/skills och ~/.agents/skills, och som ~/tidskoll/SKILL.md"
 
   say ""
   say "Klart. Webbläsarna frågar om lov första gången de används (\"python3 vill styra Safari\"): svara OK."
@@ -120,10 +126,30 @@ cmd_skarm() {
 }
 
 cmd_nattanalys() {
-  command -v claude >/dev/null || [ -x "$HOME/.claude/local/claude" ] || fail "Claude Code (claude) hittas inte."
   mkdir -p "$BIN" "$ROOT/logg"
   cp "$SRC/skarm/nattanalys.sh" "$BIN/" && chmod +x "$BIN/nattanalys.sh"
+  if [ ! -f "$ROOT/nattanalys.conf" ]; then
+    if command -v claude >/dev/null || [ -x "$HOME/.claude/local/claude" ]; then
+      cat > "$ROOT/nattanalys.conf" <<'CONF'
+# Kommandot som kör en AI-agent utan att fråga. $UPPDRAG är uppdraget.
+AGENT_KOMMANDO='claude -p "$UPPDRAG" --allowedTools "Bash(python3:*),Read,Write,Edit"'
+CONF
+      ok "nattanalys.conf skriven för Claude Code"
+    else
+      printf '# Kommandot som kör en AI-agent utan att fråga. $UPPDRAG är uppdraget.\nAGENT_KOMMANDO=\n' > "$ROOT/nattanalys.conf"
+      say "  ! Fyll i AGENT_KOMMANDO i $ROOT/nattanalys.conf med din agents headless-kommando."
+    fi
+  fi
   load_agent com.tidskoll.nattanalys
+}
+
+cmd_blockera() {
+  need_mac
+  mkdir -p "$BIN"
+  cp "$SRC/blockera/blockera.sh" "$BIN/" && chmod +x "$BIN/blockera.sh"
+  [ -f "$ROOT/blocklista.txt" ] || cp "$SRC/blockera/blocklista.txt" "$ROOT/blocklista.txt"
+  ok "blockera.sh i $BIN, listan i $ROOT/blocklista.txt"
+  say "Blocket är inte påslaget än. Gå igenom listan och slå sedan på: bash $BIN/blockera.sh pa"
 }
 
 agent_state() {
@@ -143,6 +169,7 @@ cmd_status() {
     say "Skärmdumpar idag:    $n ($(du -sh "$ROOT/skarm/days/$day" | cut -f1))"
     say "Senaste loggrad:     $(tail -1 "$ROOT/skarm/days/$day/log.jsonl" 2>/dev/null | cut -c1-120)"
   fi
+  [ -x "$BIN/blockera.sh" ] && printf '%-20s %s\n' "blockering:" "$(bash "$BIN/blockera.sh" status | head -1 | cut -d' ' -f2-)"
   if [ -s "$ROOT/skarm/daemon.log" ]; then say "Senaste fel:"; tail -3 "$ROOT/skarm/daemon.log" | sed 's/^/  /'; fi
 }
 
@@ -155,11 +182,15 @@ cmd_fortsatt() {
 }
 
 cmd_avinstallera() {
+  if grep -qxF "# === TIDSKOLL-BLOCK START ===" /etc/hosts 2>/dev/null && [ -x "$BIN/blockera.sh" ]; then
+    say "Tar bort sajtblocket (macOS frågar efter lösenordet)…"
+    bash "$BIN/blockera.sh" av
+  fi
   for l in webblasare veckorapport skarm nattanalys; do
     launchctl bootout "$GUI/com.tidskoll.$l" 2>/dev/null || true
     rm -f "$AGENTS/com.tidskoll.$l.plist"
   done
-  rm -rf "$APP" "$SKILL_DIR" "$BIN"
+  rm -rf "$APP" "${SKILL_DIRS[@]}" "$BIN" "$ROOT/SKILL.md"
   ok "bakgrundsjobb, Tidskoll.app, skillen och skripten borttagna"
   say "Kvar: din data i $ROOT och ActivityWatch själv."
   say "  Ta bort datan:        rm -rf $ROOT"
@@ -170,9 +201,10 @@ case "${1:-}" in
   bas)          shift; cmd_bas "$@" ;;
   skarm)        shift; cmd_skarm "$@" ;;
   nattanalys)   cmd_nattanalys ;;
+  blockera)     cmd_blockera ;;
   status)       cmd_status ;;
   paus)         cmd_paus ;;
   fortsatt)     cmd_fortsatt ;;
   avinstallera) cmd_avinstallera ;;
-  *) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

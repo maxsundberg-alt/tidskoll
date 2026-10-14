@@ -37,12 +37,16 @@ MONTHS = ["", "jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "ok
 WEEKDAYS = ["mån", "tis", "ons", "tor", "fre", "lör", "sön"]
 URL_PREFIXES = ("aw-watcher-tidskoll-url", "aw-watcher-web")
 DEEP_FOCUS_S = 600
+BLOCKLISTA = Path.home() / "tidskoll" / "blocklista.txt"
+# Titeln på en flik där sajten inte gick att nå. Safari skriver "Failed to open page";
+# Chrome visar bara adressen som titel. Allt annat räknas som att sidan laddade.
+FELSIDOR = {"failed to open page", ""}
 
 
 def fetch(periods: list[str], categories: list[dict]) -> list[dict]:
     buckets = aw.get("/buckets/")
     rules = aw.rules(categories)
-    out = [{"app": {}, "cat": {}, "dom": {}} for _ in periods]
+    out = [{"app": {}, "cat": {}, "dom": {}, "sidor": []} for _ in periods]
     for win, afk in aw.bucket_pairs(buckets):
         res = aw.query(aw.active_query(win, afk, rules, (
             'RETURN = {"app": merge_events_by_keys(active, ["app"]), '
@@ -60,14 +64,35 @@ def fetch(periods: list[str], categories: list[dict]) -> list[dict]:
             continue
         try:
             res = aw.query([f'events = flood(query_bucket("{bid}"));',
-                            'RETURN = merge_events_by_keys(events, ["url"]);'], periods[:1])
+                            'RETURN = merge_events_by_keys(events, ["url", "title"]);'], periods[:1])
         except Exception:
             continue
         for e in res[0]:
             d = urlparse(e["data"].get("url", "")).netloc.removeprefix("www.")
             if d:
                 out[0]["dom"][d] = out[0]["dom"].get(d, 0) + e["duration"]
+                out[0]["sidor"].append((d, e["data"].get("title") or "", e["duration"]))
     return out
+
+
+def blocked(week: dict) -> dict | None:
+    """Tid på sajter i blocklistan: hur mycket som faktiskt laddade, och hur mycket
+    som bara var en flik med felsida som låg framme."""
+    if not BLOCKLISTA.exists():
+        return None
+    lista = [r.strip() for r in BLOCKLISTA.read_text().splitlines()
+             if r.strip() and not r.strip().startswith("#")]
+    laddade: dict[str, float] = {}
+    dod = 0.0
+    for host, title, dur in week["sidor"]:
+        traff = next((b for b in lista if host == b or host.endswith("." + b)), None)
+        if not traff:
+            continue
+        if title.strip().lower() in FELSIDOR or title.strip().lower().removeprefix("www.") == host:
+            dod += dur
+        else:
+            laddade[traff] = laddade.get(traff, 0) + dur
+    return {"laddade": laddade, "dod": dod}
 
 
 def total(p: dict) -> float:
@@ -126,7 +151,7 @@ def esc(s) -> str:
     return html.escape(str(s))
 
 
-def render(week, prev, days, start, end, colors, fw) -> str:
+def render(week, prev, days, start, end, colors, fw, bl=None) -> str:
     tot, ptot = total(week), total(prev)
     cats = sorted(top_cats(week).items(), key=lambda kv: kv[1], reverse=True)
     pcats = top_cats(prev)
@@ -165,6 +190,21 @@ def render(week, prev, days, start, end, colors, fw) -> str:
             f'<div><b>{median}</b><span>i samma fönster innan du byter, median</span></div>'
             '</div></section>')
 
+    block_html = ""
+    if bl is not None:
+        tot_l = sum(bl["laddade"].values())
+        if tot_l >= 60:
+            intro = (f"{aw.fmt_dur(tot_l)} på blockerade sajter som ändå laddade. "
+                     "Antingen var blocket av, sajten var lyft, eller så går något runt blocket "
+                     "(vanligast är iCloud Private Relay i Safari).")
+        else:
+            intro = "Inget av det blockerade laddade den här veckan."
+        dod = (f'<div class="sub">{aw.fmt_dur(bl["dod"])} var flikar med felsida som bara låg framme.</div>'
+               if bl["dod"] >= 60 else "")
+        block_html = (f'<section><h2>Blockerade sajter</h2><div>{intro}</div>{dod}'
+                      + (f'<ul style="margin-top:10px">{toplist(bl["laddade"])}</ul>' if tot_l >= 60 else "")
+                      + "</section>")
+
     span = f"{start.day} {MONTHS[start.month]}–{end.day} {MONTHS[end.month]}"
     return f"""<!doctype html><html lang="sv"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -196,6 +236,7 @@ footer{{margin-top:24px;font-size:12px;color:var(--muted)}}
 <section><h2>Per dag</h2><div class="days">{dayhtml}</div></section>
 <section><h2>Kategorier</h2>{''.join(rows) or 'Ingen data'}</section>
 {fokus}
+{block_html}
 <div class="two" style="margin-top:18px"><section><h2>Appar</h2><ul>{toplist(week["app"])}</ul></section>
 <section><h2>Sajter</h2><ul>{toplist(week["dom"])}</ul></section></div>
 <footer>Räknat lokalt ur ActivityWatch {datetime.now():%Y-%m-%d %H:%M}. Bara tid när du satt vid datorn räknas.</footer>
@@ -225,7 +266,7 @@ def main() -> int:
     colors = {c["name"][0]: c.get("data", {}).get("color") for c in categories if len(c["name"]) == 1}
     fw = focus([d.strftime("%Y-%m-%d") for d in day_starts])
 
-    page = render(res[0], res[1], list(zip(day_starts, res[2:])), start, now, colors, fw)
+    page = render(res[0], res[1], list(zip(day_starts, res[2:])), start, now, colors, fw, blocked(res[0]))
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     out = OUT_DIR / f"vecka-{now:%Y-%m-%d}.html"
     out.write_text(page)

@@ -1,6 +1,6 @@
 ---
 name: tidskoll
-description: Svara på hur användaren lägger sin tid vid datorn, utifrån Tidskoll (ActivityWatch-data och valfria skärmdumpar på den egna Macen). Använd vid "/tidskoll", "vart tog tiden vägen", "hur mycket tid la jag på X", "vad gjorde jag igår", "veckorapport", "kategorisera min tid", "vad kan jag effektivisera", "analysera min skärmtid", "pausa skärmdumparna", eller "/tidskoll dag|vecka|kategorier|analysera|effektivisera|status|paus|fortsatt".
+description: Svara på hur användaren lägger sin tid vid datorn, utifrån Tidskoll (ActivityWatch-data, sajtblockering och valfria skärmdumpar på den egna Macen). Använd vid "/tidskoll", "vart tog tiden vägen", "hur mycket tid la jag på X", "vad gjorde jag igår", "veckorapport", "kategorisera min tid", "vad kan jag effektivisera", "analysera min skärmtid", "pausa skärmdumparna", "blockera/öppna en sajt", eller "tidskoll dag|vecka|kategorier|analysera|effektivisera|blockera|lyft|status|paus|fortsatt".
 ---
 
 # Tidskoll
@@ -17,6 +17,7 @@ Pythons standardbibliotek. Kör dem med `python3`.
 | `~/tidskoll/anteckningar/<datum>.md` | dagsanteckningar från analysen, sparas för alltid |
 | `~/tidskoll/observationer.md` | återkommande mönster med antal gånger de setts |
 | `~/tidskoll/pauslista.txt` | appar och adresser där ingen skärmdump tas |
+| `~/tidskoll/blocklista.txt` | sajter som blockeras i alla webbläsare när blocket är på |
 
 Svara på svenska, i klartext och med siffror. Hitta aldrig på en siffra: saknas data, säg det.
 Läs aldrig rå `log.jsonl` eller hela API-svar i kontext. Låt skripten räkna och läs deras JSON.
@@ -62,6 +63,8 @@ Fällor i ActivityWatchs regexmotor (Rust, inte Python):
 ## `analysera [datum]` (kräver skärmdumpsnivån; standard: igår om det finns data, annars idag)
 
 Metadata först, bilder sedan. Mål: 10 till 30 bilder per dag, aldrig alla.
+Kan du inte öppna bildfiler i den agent du kör i: säg det, och gör analysen på loggen och
+tiden i steg 1 och 2. Mönster som kräver bilder (menyer, fildialoger) syns då inte.
 
 1. `python3 ~/tidskoll/bin/dag.py <datum>` ger tiden per kategori och app.
 2. `python3 ~/tidskoll/bin/block.py <datum>` ger arbetspass, appbyten, perioder med
@@ -79,7 +82,7 @@ Metadata först, bilder sedan. Mål: 10 till 30 bilder per dag, aldrig alla.
    Annars lägg till en rad:
    `- [antal: 1, senast: 2026-10-08] Öppnar kalkylarket via Finder varje morgon; ett bokmärke eller kortkommando sparar ungefär 20 s per gång. (Sett: 2026-10-08/09-14-20.webp)`
 
-Integritet: bilderna du öppnar skickas till Anthropic. Öppna aldrig en bild vars
+Integritet: bilderna du öppnar skickas till leverantören av modellen du kör på. Öppna aldrig en bild vars
 loggrad visar bank, lösenordshanterare eller annat som borde ha stått på pauslistan.
 Föreslå i stället att raden läggs till i `~/tidskoll/pauslista.txt`.
 
@@ -93,6 +96,26 @@ Föreslå i stället att raden läggs till i `~/tidskoll/pauslista.txt`.
 4. Sortera efter uppskattad tid sparad per vecka och visa de tre till fem största.
    Erbjud att bygga dem som går att automatisera.
 5. Med `fokus` (till exempel "mejl" eller "webbläsare"): bara det området.
+
+## `blockera`, `lyft <domän>`, `ater <domän>`
+
+Blocket pekar sajterna i `~/tidskoll/blocklista.txt` mot 0.0.0.0 i `/etc/hosts`, så de inte
+laddar i någon webbläsare. Kräver att `bash installera.sh blockera` körts.
+
+- Status: `bash ~/tidskoll/bin/blockera.sh status`
+- Slå på eller av: `bash ~/tidskoll/bin/blockera.sh pa|av`
+- Öppna en sajt tillfälligt: `bash ~/tidskoll/bin/blockera.sh lyft youtube.com` (öppnar även
+  underdomäner). Stäng igen: `ater youtube.com`.
+- Lägga till en sajt: skriv domänen i listan och kör `pa` igen. `www.` och `m.` läggs till
+  automatiskt, andra underdomäner måste stå på egen rad.
+
+Varje ändring visar macOS lösenordsruta. Användaren skriver lösenordet där. Be aldrig om det
+i chatten. Vill användaren lyfta en sajt: gör det, men säg först hur mycket tid sajten fick
+de senaste sju dagarna enligt `dag.py` eller veckorapporten, så att beslutet tas med siffran framför sig.
+
+Laddar en blockerad sajt ändå i Safari: kontrollera iCloud Private Relay först, den skickar
+trafiken förbi `/etc/hosts`. Redan öppna flikar kan också ladda en stund efter att blocket
+slagits på; Cmd+Q på webbläsaren löser det.
 
 ## `status`, `paus`, `fortsatt`
 
