@@ -1,75 +1,79 @@
 # Minska skärmtiden
 
-Tidskoll visar vart tiden går. Den här guiden handlar om nästa steg: att ändra det.
+Tidskoll visar vart tiden går. Den här guiden handlar om nästa steg, att ändra det.
 
-Principen är att ta bort ytan i stället för att förlita sig på viljestyrka. En sajt som inte
-laddar behöver man inte stå emot. Ett flöde som inte syns lockar inte. Sedan mäter du om det
-höll, för en spärr som läcker märks inte förrän man tittar i siffrorna.
+Det som hjälper mest är att göra det svårt att hamna där. En sajt som inte går att öppna
+behöver du inte stå emot, och ett flöde som inte syns lockar inte. Mät sedan om det höll.
+En blockering som inte fungerar märks först i siffrorna.
 
 Verktygen nedan är ordnade från hårdast till mjukast. De flesta behöver en blandning.
 
 ## 1. Blockera sajten helt
 
-För sajter du inte behöver alls: video, sociala medier, nyheter, forum.
+För sajter du inte behöver alls: video, sociala medier, nyheter och forum.
 
 Tidskoll kan blockera sajterna i `~/tidskoll/blocklista.txt` i alla webbläsare på datorn
-samtidigt, även inkognito och webbläsare du installerar senare. Det sker i `/etc/hosts`,
-datorns egen adressbok, där sajterna pekas mot en adress som inte finns. Be din agent
-installera blockeringen, eller kör `bash installera.sh blockera`.
+samtidigt, även i inkognitoläge och i webbläsare du installerar senare. Det sker i
+`/etc/hosts`, datorns egen adressbok, där sajterna pekas mot en adress som inte finns. Be din
+agent installera blockeringen, eller kör `bash installera.sh blockera` i den nedladdade mappen.
 
-Att öppna en sajt kräver lösenordet varje gång (`blockera.sh lyft <sajt>`). Den friktionen
-är poängen. Det ska vara ett beslut, inte en reflex.
+Att öppna en blockerad sajt igen (`blockera.sh lyft <domän>`) kräver datorns lösenord varje
+gång. Det är meningen: att öppna en sajt ska kräva att du bestämmer dig.
 
-Blocket når inte telefonen och inte appar som har en egen väg till nätet. Se avsnitt 4.
+Blockeringen gäller bara datorn. För telefonen, se avsnitt 4.
 
-## 2. Dölj flödet men behåll sajten
+## 2. Dölj flödet och behåll sajten
 
-För sajter du behöver i jobbet men där flödet äter tid. LinkedIn är det vanligaste
-exemplet: du behöver meddelanden och profiler, men inte flödet.
+För sajter du behöver i jobbet men där flödet äter tid. LinkedIn är det vanligaste exemplet:
+du behöver meddelanden och profiler, men inte flödet.
 
-**SocialFocus** är ett webbläsartillägg som döljer utvalda delar av sajter: flöden,
-rekommendationer, siffror och annonser. Det täcker bland annat LinkedIn, YouTube, X,
-Instagram, Reddit, Facebook och Gmail, och finns för Safari (via App Store) samt Chrome och
-Firefox. Safari-versionen kostar en engångssumma, med en betald Pro-nivå ovanpå. Det fungerar
-bara i webbläsaren, inte i apparna. Ett sätt att använda det: ha det påslaget som standard,
-och stäng av det bara när du ska göra något som kräver flödet.
+**SocialFocus** är ett webbläsartillägg som döljer utvalda delar av sajter, till exempel
+flöden, rekommendationer, siffror och annonser. Det fungerar bland annat på LinkedIn,
+YouTube, X, Instagram, Reddit, Facebook och Gmail, och finns för Safari (via App Store) och för
+Chrome och Firefox. Safari-versionen kostar en engångssumma, och det finns en dyrare
+Pro-version. Det fungerar bara i webbläsaren. I apparna gör det ingenting. Ett sätt att
+använda det är att ha det påslaget hela tiden och bara stänga av det när du ska göra något
+som kräver flödet.
 
 ## 3. Lägg in en paus
 
-För appar och sajter du inte vill stänga helt men öppnar av ren vana.
+För appar och sajter du inte vill blockera helt men öppnar av ren vana.
 
-**One Sec** lägger in en kort paus, och en fråga om du verkligen vill, innan en app eller
+**One Sec** visar en kort paus och frågar om du verkligen vill fortsätta innan en app eller
 sajt öppnas. Pausen räcker ofta för att impulsen ska hinna gå över. Den finns för iPhone,
-Android och Mac (macOS 14 eller senare), och som webbläsartillägg. Grunden är gratis, och
-det finns en betalversion.
+Android och Mac (macOS 14 eller senare), och som webbläsartillägg. Grundversionen är gratis,
+och det finns en betalversion.
 
-## 4. Telefonen och apparna
+## 4. Telefonen
 
-Blocket i avsnitt 1 gäller bara datorn. På telefonen:
+Blockeringen i avsnitt 1 gäller bara datorn. På telefonen:
 
-- **Skärmtid** (inbyggt i iPhone och Mac): tidsgränser per app eller kategori, och under
-  Innehåll och integritet en spärr för vuxensajter som gäller i alla webbläsare.
-- **One Sec** på telefonen för apparna du öppnar av vana.
+- **Skärmtid**, som finns inbyggt i iPhone och Mac: tidsgränser per app eller kategori, och
+  under Innehåll och integritet en spärr för vuxensajter som gäller i alla webbläsare.
+- **One Sec** för apparna du öppnar av vana.
 - Flytta apparna från hemskärmen. Det som inte syns öppnas mer sällan.
 
-## Fallgropar
+## Vanliga fel
 
-- **iCloud Private Relay går runt blocket i Safari.** Trafiken går via Apples relä och läser
-  aldrig `/etc/hosts`. Laddar en blockerad sajt ändå i Safari är det nästan alltid det här.
-  Inställningen finns under Systeminställningar → Apple-konto → iCloud → Private Relay.
-- **Redan öppna flikar laddar en stund till** efter att blocket slagits på. Avsluta
-  webbläsaren helt (Cmd+Q) och prova på en sajt som inte var öppen.
+- **Privat reläservice (iCloud Private Relay) kringgår blockeringen i Safari.** Trafiken går
+  via Apples egna servrar, och då används aldrig `/etc/hosts`. Går en blockerad sajt ändå att
+  öppna i Safari är det nästan alltid det här. Inställningen finns under Systeminställningar →
+  ditt namn högst upp → iCloud → Privat reläservice.
+- **Flikar som redan var öppna fortsätter fungera en stund** efter att blockeringen slagits
+  på. Avsluta webbläsaren helt (Cmd+Q) och prova med en sajt som inte var öppen.
 - **Underdomäner räknas för sig.** Tidskoll lägger till `www.` och `m.` automatiskt, men till
-  exempel `music.youtube.com` och `se.pinterest.com` måste stå i listan på egna rader.
-- **En öppen flik är inte samma sak som en sajt som laddade.** En blockerad sajt som ligger
-  framme visar en felsida, och den tiden mäts ändå. Veckorapporten skiljer på de två genom
-  sidtiteln: Safari skriver "Failed to open page" och Chrome visar bara adressen.
-- **Tillfälliga undantag blir lätt permanenta.** En sajt som öppnas "för en kväll" ligger
-  kvar tills någon stänger den. Kolla `blockera.sh status` då och då, eller be din agent göra det.
+  exempel `music.youtube.com` och `se.pinterest.com` måste stå på egna rader i listan.
+- **En öppen flik är inte samma sak som en sajt som faktiskt laddades.** En blockerad sajt som
+  är den aktiva fliken visar en felsida, och den tiden mäts ändå. Veckorapporten skiljer på
+  de två med hjälp av sidans titel. Säkert fungerar det bara i Safari på engelska, där felsidan
+  heter "Failed to open page". I andra webbläsare och på andra språk kan felsidan heta något
+  annat, och då kan den tiden räknas som att sajten laddades.
+- **Tillfälliga undantag blir lätt permanenta.** En sajt som öppnas för en kväll förblir öppen
+  tills någon blockerar den igen. Kör `blockera.sh status` då och då, eller be din agent göra det.
 
 ## Mät att det håller
 
-Veckorapporten har en rad om blockerade sajter: hur mycket tid som gick till dem trots
-blocket, och vilka sajter det gällde. Står det noll fungerar blocket. Står det något är
-blocket av, sajten är öppnad som undantag, eller så går något runt blocket. Börja i så fall
-med Private Relay.
+Veckorapporten har ett avsnitt om blockerade sajter: hur mycket tid som gick till dem trots
+blockeringen, och vilka sajter det gällde. Står det att ingen blockerad sajt laddades
+fungerar blockeringen. Står det något annat är blockeringen avstängd, sajten tillfälligt
+öppnad, eller så kringgår något blockeringen. Börja i så fall med Privat reläservice.

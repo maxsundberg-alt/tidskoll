@@ -1,15 +1,17 @@
 #!/bin/bash
 # Tidskoll — installation och styrning (macOS). Går att köra om, inget dubbleras.
 #
-#   bash installera.sh bas [--kategorier]   ActivityWatch, webbläsarbevakaren, veckorapporten
-#                                           och skillen tidskoll. --kategorier ersätter
-#                                           ActivityWatchs kategorier med startindelningen.
+#   bash installera.sh bas                  ActivityWatch, webbläsarbevakaren, veckorapporten
+#                                           och skillen tidskoll
 #   bash installera.sh skarm [--bygg-om]    skärmdumpar var femte sekund (valfri nivå)
 #   bash installera.sh blockera             blockering av sajter i alla webbläsare (valfri,
 #                                           slås på separat med ~/tidskoll/bin/blockera.sh pa)
 #   bash installera.sh status               vad som körs, och dagens data
 #   bash installera.sh paus | fortsatt      stoppa eller starta skärmdumparna
 #   bash installera.sh avinstallera         ta bort allt utom din data
+#
+# Efter installationen ligger en kopia i ~/tidskoll/bin/installera.sh. Den klarar status,
+# paus, fortsatt och avinstallera. Att installera kräver den nedladdade mappen.
 set -euo pipefail
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -31,15 +33,16 @@ load_agent() {   # $1 = label
   sed "s#__HOME__#$HOME#g" "$SRC/launchd/$1.plist" > "$dst"
   launchctl bootout "$GUI/$1" 2>/dev/null || true
   launchctl bootstrap "$GUI" "$dst"
-  ok "$1 laddad"
+  ok "$1 startad"
 }
 
 aw_up() { curl -sf --max-time 3 http://localhost:5600/api/0/info >/dev/null; }
 
 need_mac() { [ "$(uname)" = "Darwin" ] || fail "Tidskoll fungerar bara på macOS."; }
+need_src() { [ -d "$SRC/bas" ] || fail "Installera från den nedladdade Tidskoll-mappen, inte från ~/tidskoll/bin."; }
 
 cmd_bas() {
-  need_mac
+  need_mac; need_src
   say "▸ Tidskoll, grundnivån"
 
   # 1. ActivityWatch
@@ -47,7 +50,7 @@ cmd_bas() {
     if command -v brew >/dev/null; then
       brew install --cask activitywatch
     else
-      fail "ActivityWatch saknas och Homebrew finns inte. Ladda ner från https://activitywatch.net/downloads/ och kör sedan om."
+      fail "ActivityWatch saknas och Homebrew finns inte. Ladda ner ActivityWatch från https://activitywatch.net/downloads/ och kör sedan skriptet igen."
     fi
   fi
   ok "ActivityWatch finns i /Applications"
@@ -63,13 +66,11 @@ cmd_bas() {
 
   # 2. Skript
   mkdir -p "$BIN" "$ROOT/logg" "$ROOT/rapporter"
-  cp "$SRC"/bas/*.py "$SRC/skarm/block.py" "$BIN/"
+  cp "$SRC"/bas/*.py "$SRC/skarm/arbetspass.py" "$BIN/"
+  [ "$SRC" = "$BIN" ] || cp "$SRC/installera.sh" "$BIN/"
   [ -f "$ROOT/kategorier.json" ] || cp "$SRC/bas/kategorier.json" "$ROOT/kategorier.json"
   ok "skript i $BIN"
 
-  if [ "${1:-}" = "--kategorier" ]; then
-    /usr/bin/python3 "$BIN/kategorier.py" tillampa "$ROOT/kategorier.json"
-  fi
 
   # 3. Bakgrundsjobb
   load_agent com.tidskoll.webblasare
@@ -84,22 +85,22 @@ cmd_bas() {
   ok "skillen tidskoll i ~/.claude/skills och ~/.agents/skills, och som ~/tidskoll/SKILL.md"
 
   say ""
-  say "Klart. Webbläsarna frågar om lov första gången de används (\"python3 vill styra Safari\"): svara OK."
+  say "Klart. macOS frågar en gång per webbläsare om python3 får styra den: svara OK."
 }
 
 cmd_skarm() {
-  need_mac
+  need_mac; need_src
   say "▸ Tidskoll, skärmdumpar"
   xcode-select -p >/dev/null 2>&1 || fail "Xcode Command Line Tools saknas. Kör: xcode-select --install"
   if ! command -v cwebp >/dev/null && [ ! -x /opt/homebrew/bin/cwebp ] && [ ! -x /usr/local/bin/cwebp ]; then
     if command -v brew >/dev/null; then brew install webp; else say "  (cwebp saknas, bilderna sparas som JPEG och blir ungefär tre gånger större)"; fi
   fi
 
-  mkdir -p "$BIN" "$ROOT/skarm/days" "$ROOT/anteckningar" "$ROOT/logg"
+  mkdir -p "$BIN" "$ROOT/skarm/dagar" "$ROOT/anteckningar"
   touch "$ROOT/skarm/daemon.log"
   [ -f "$ROOT/observationer.md" ] || printf '# Återkommande mönster\n\n' > "$ROOT/observationer.md"
   [ -f "$ROOT/pauslista.txt" ] || cp "$SRC/skarm/pauslista.txt" "$ROOT/pauslista.txt"
-  cp "$SRC/skarm/capture-loop.sh" "$SRC/skarm/block.py" "$BIN/"
+  cp "$SRC/skarm/capture-loop.sh" "$SRC/skarm/arbetspass.py" "$BIN/"
   chmod +x "$BIN/capture-loop.sh"
   ok "skärmdumpsloopen i $BIN, pauslistan i $ROOT/pauslista.txt"
 
@@ -118,39 +119,40 @@ cmd_skarm() {
 
   load_agent com.tidskoll.skarm
   say ""
-  say "Nästa steg, görs i Systeminställningar:"
+  say "Nästa steg gör du i Systeminställningar:"
   say "  Integritet och säkerhet → Skärm- och systemljudinspelning → + → Cmd+Shift+G → ~/Applications → Tidskoll.app"
   say "  Samma sak under Hjälpmedel."
-  say "  Starta sedan om: bash installera.sh fortsatt"
+  say "  Starta sedan om skärmdumparna: bash installera.sh fortsatt"
 }
 
 cmd_blockera() {
-  need_mac
+  need_mac; need_src
   mkdir -p "$BIN"
   cp "$SRC/blockera/blockera.sh" "$BIN/" && chmod +x "$BIN/blockera.sh"
   [ -f "$ROOT/blocklista.txt" ] || cp "$SRC/blockera/blocklista.txt" "$ROOT/blocklista.txt"
   ok "blockera.sh i $BIN, listan i $ROOT/blocklista.txt"
-  say "Blocket är inte påslaget än. Gå igenom listan och slå sedan på: bash $BIN/blockera.sh pa"
+  say "Blockeringen är inte påslagen än. Gå igenom listan och slå sedan på blockeringen: bash $BIN/blockera.sh pa"
 }
 
 agent_state() {
   local out
   out="$(launchctl print "$GUI/$1" 2>/dev/null)" || { printf 'inte installerad'; return; }
-  if [[ "$out" == *"state = running"* ]]; then printf 'kör'; else printf 'laddad, väntar'; fi
+  if [[ "$out" == *"state = running"* ]]; then printf 'kör'; else printf 'schemalagd, väntar på nästa körning'; fi
 }
 
 cmd_status() {
   local day; day="$(date +%F)"
   if aw_up; then say "ActivityWatch:       kör"; else say "ActivityWatch:       svarar inte"; fi
-  for l in webblasare veckorapport skarm; do
-    printf '%-20s %s\n' "$l:" "$(agent_state com.tidskoll.$l)"
-  done
-  if [ -d "$ROOT/skarm/days/$day" ]; then
-    local n; n=$(find "$ROOT/skarm/days/$day" -name '*.webp' -o -name '*.jpg' | wc -l | tr -d ' ')
-    say "Skärmdumpar idag:    $n ($(du -sh "$ROOT/skarm/days/$day" | cut -f1))"
-    say "Senaste loggrad:     $(tail -1 "$ROOT/skarm/days/$day/log.jsonl" 2>/dev/null | cut -c1-120)"
+  # Fasta mellanslag: printf räknar bytes, och å, ä och ö är två bytes var.
+  say "Webbläsarbevakaren:  $(agent_state com.tidskoll.webblasare)"
+  say "Veckorapporten:      $(agent_state com.tidskoll.veckorapport)"
+  say "Skärmdumpar:         $(agent_state com.tidskoll.skarm)"
+  if [ -d "$ROOT/skarm/dagar/$day" ]; then
+    local n; n=$(find "$ROOT/skarm/dagar/$day" -name '*.webp' -o -name '*.jpg' | wc -l | tr -d ' ')
+    say "Skärmdumpar idag:    $n ($(du -sh "$ROOT/skarm/dagar/$day" | cut -f1))"
+    say "Senaste loggraden:   $(tail -1 "$ROOT/skarm/dagar/$day/log.jsonl" 2>/dev/null | cut -c1-120)"
   fi
-  [ -x "$BIN/blockera.sh" ] && printf '%-20s %s\n' "blockering:" "$(bash "$BIN/blockera.sh" status | head -1 | cut -d' ' -f2-)"
+  [ -x "$BIN/blockera.sh" ] && say "Blockering:          $(bash "$BIN/blockera.sh" status | head -1 | cut -d' ' -f2-)"
   if [ -s "$ROOT/skarm/daemon.log" ]; then say "Senaste fel:"; tail -3 "$ROOT/skarm/daemon.log" | sed 's/^/  /'; fi
 }
 
@@ -164,7 +166,7 @@ cmd_fortsatt() {
 
 cmd_avinstallera() {
   if grep -qxF "# === TIDSKOLL-BLOCK START ===" /etc/hosts 2>/dev/null && [ -x "$BIN/blockera.sh" ]; then
-    say "Tar bort sajtblocket (macOS frågar efter lösenordet)…"
+    say "Stänger av blockeringen (macOS frågar efter datorns lösenord)…"
     bash "$BIN/blockera.sh" av
   fi
   for l in webblasare veckorapport skarm; do
@@ -176,6 +178,9 @@ cmd_avinstallera() {
   say "Kvar: din data i $ROOT och ActivityWatch själv."
   say "  Ta bort datan:        rm -rf $ROOT"
   say "  Ta bort ActivityWatch: brew uninstall --cask activitywatch (eller släng appen)"
+  if [ -f /etc/hosts.tidskoll-original ]; then
+    say "  /etc/hosts.tidskoll-original är en kopia av hosts-filen från före blockeringen. Den kan tas bort med sudo rm."
+  fi
 }
 
 case "${1:-}" in
@@ -186,5 +191,5 @@ case "${1:-}" in
   paus)         cmd_paus ;;
   fortsatt)     cmd_fortsatt ;;
   avinstallera) cmd_avinstallera ;;
-  *) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

@@ -1,10 +1,10 @@
 # Pauslista för Tidskoll. När appnamnet eller adressen innehåller en rad här tas
 # ingen skärmdump. Vilken app som var öppen loggas ändå, så tiden räknas.
 #
-# En delsträng per rad. Rader som börjar med # används inte.
-# Ändringar gäller direkt, ingen omstart behövs.
+# En bit text per rad, till exempel ett appnamn eller en del av en adress.
+# Rader som börjar med # räknas inte. Ändringar gäller direkt.
 #
-# Listan är påslagen från början. Vill du att något ska fotas: sätt # framför raden.
+# Alla rader nedan gäller från början. Vill du att något ska fotas: sätt # framför raden.
 
 # Lösenord och inloggning
 1Password
@@ -30,7 +30,7 @@ skandia.se
 danskebank.se
 sparbank
 
-# Betalning och myndigheter
+# Betalning, myndigheter och vård
 klarna.com
 paypal.com
 skatteverket.se

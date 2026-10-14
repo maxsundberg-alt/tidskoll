@@ -1,14 +1,15 @@
 /* Tidskoll.app — startar skärmdumpsloopen (macOS).
  *
- * Varför en kompilerad app: behörigheten att spela in skärmen fäster vid en
- * process kodidentitet. Ett skalskript under launchd räknas som /bin/bash,
+ * Varför en kompilerad app: behörigheten att spela in skärmen är knuten till
+ * processens kodidentitet. Ett skalskript under launchd räknas som /bin/bash,
  * Apples egen fil, så behörigheten matchar aldrig och screencapture misslyckas
  * tyst. Det här programmet är appens huvudfil. Det lever kvar som den process
- * macOS frågar om lov, och startar loopen som ett barn som ärver behörigheten.
+ * macOS ger behörigheten till, och startar skärmdumpsloopen som en barnprocess
+ * som ärver den.
  *
  * Bygg:     cc -o Tidskoll.app/Contents/MacOS/tidskoll wrapper.c
  * Signera:  codesign -s - --force --identifier com.tidskoll.skarm Tidskoll.app
- * Bygg och signera EN gång och ge behörighet efteråt. En ny signatur gör den
+ * Bygg och signera en gång och ge behörighet efteråt. En ny signatur gör den
  * gamla behörigheten ogiltig.
  *
  * Bygger på wrapper.c i screenwatch-kit av Muhammad Ali (MIT-licens).
@@ -33,6 +34,6 @@ int main(void) {
         if (posix_spawn(&pid, "/bin/bash", 0, 0, argv, environ) != 0)
             return 1;
         waitpid(pid, &status, 0);
-        sleep(5); /* loopen kraschade eller avslutades, starta om den */
+        sleep(5); /* skärmdumpsloopen kraschade eller avslutades, starta om den */
     }
 }

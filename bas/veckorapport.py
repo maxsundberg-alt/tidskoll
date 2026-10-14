@@ -2,8 +2,9 @@
 """Veckorapport över datortiden, som en HTML-sida på den egna datorn.
 
 Senaste sju dagarna jämfört med veckan innan: aktiv tid, tid per dag, per
-kategori med underkategorier, toppappar och toppsajter. Är skärmdumpsnivån
-installerad kommer även fokusmått med (långa arbetspass, växlingar per timme).
+kategori med underkategorier, de mest använda apparna och sajterna, och om
+blockerade sajter ändå laddades. Är skärmdumpsnivån installerad kommer även
+fokusmått med (långa arbetspass, appbyten per timme).
 
 Allt räknas fram lokalt. Inget skickas någonstans.
 
@@ -15,7 +16,6 @@ from __future__ import annotations
 
 import argparse
 import html
-import json
 import subprocess
 import sys
 from datetime import datetime, timedelta
@@ -24,13 +24,12 @@ from urllib.parse import urlparse
 
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
-sys.path.insert(0, str(HERE.parent / "skarm"))   # i repot; installerat ligger allt i samma mapp
 import aw  # noqa: E402
 
 try:
-    import block  # noqa: E402  (skärmdumpsnivån, valfri)
+    import arbetspass  # noqa: E402  (skärmdumpsnivån, valfri)
 except Exception:
-    block = None
+    arbetspass = None
 
 OUT_DIR = Path.home() / "tidskoll" / "rapporter"
 MONTHS = ["", "jan", "feb", "mar", "apr", "maj", "jun", "jul", "aug", "sep", "okt", "nov", "dec"]
@@ -38,8 +37,9 @@ WEEKDAYS = ["mån", "tis", "ons", "tor", "fre", "lör", "sön"]
 URL_PREFIXES = ("aw-watcher-tidskoll-url", "aw-watcher-web")
 DEEP_FOCUS_S = 600
 BLOCKLISTA = Path.home() / "tidskoll" / "blocklista.txt"
-# Titeln på en flik där sajten inte gick att nå. Safari skriver "Failed to open page";
-# Chrome visar bara adressen som titel. Allt annat räknas som att sidan laddade.
+# Titeln på en flik där sajten inte gick att nå. Kontrollerat: Safari på engelska skriver
+# "Failed to open page". Antaget: Chrome visar adressen som titel. Andra språk och webbläsare
+# kan ha andra titlar; lägg till dem här i gemener om felsidor räknas som laddade.
 FELSIDOR = {"failed to open page", ""}
 
 
@@ -82,10 +82,15 @@ def blocked(week: dict) -> dict | None:
         return None
     lista = [r.strip() for r in BLOCKLISTA.read_text().splitlines()
              if r.strip() and not r.strip().startswith("#")]
+    # Samma namn som blockera.sh lägger i /etc/hosts: raden själv plus www. och m.
+    blockade = {}
+    for b in lista:
+        for h in (b, f"www.{b}", f"m.{b}"):
+            blockade.setdefault(h, b)
     laddade: dict[str, float] = {}
     dod = 0.0
     for host, title, dur in week["sidor"]:
-        traff = next((b for b in lista if host == b or host.endswith("." + b)), None)
+        traff = blockade.get(host) or blockade.get(f"www.{host}")
         if not traff:
             continue
         if title.strip().lower() in FELSIDOR or title.strip().lower().removeprefix("www.") == host:
@@ -113,23 +118,23 @@ def subcats(p: dict, name: str) -> list[tuple[str, float]]:
 
 
 def focus(days: list[str]) -> dict | None:
-    if block is None:
+    if arbetspass is None:
         return None
     durs, switches, ticks, n = [], 0, 0, 0
     for d in days:
         try:
-            b = block.build(d)
+            b = arbetspass.build(d)
         except Exception:
             continue
-        if not b.get("tick_count"):
+        if not b.get("antal_rader"):
             continue
         n += 1
-        ticks += b["tick_count"]
-        switches += b.get("switches", 0)
-        durs += [x["dur_s"] for x in b.get("blocks", [])]
+        ticks += b["antal_rader"]
+        switches += b.get("appbyten", 0)
+        durs += [x["sekunder"] for x in b.get("pass", [])]
     if not n:
         return None
-    hours = ticks * block.TICK_INTERVAL / 3600
+    hours = ticks * arbetspass.SEKUNDER_PER_RAD / 3600
     deep = [s for s in durs if s >= DEEP_FOCUS_S]
     durs.sort()
     return {"dagar": n, "djup_antal": len(deep), "djup_s": sum(deep),
@@ -142,7 +147,7 @@ def trend(curr: float, prev: float, suffix: str = "") -> str:
         return ""
     diff = (curr - prev) / prev
     if abs(diff) < 0.05:
-        return '<span class="t">som förra veckan</span>'
+        return '<span class="t">samma som förra veckan</span>'
     arrow = "↑" if diff > 0 else "↓"
     return f'<span class="t">{arrow} {abs(round(diff * 100))} %{suffix}</span>'
 
@@ -186,22 +191,22 @@ def render(week, prev, days, start, end, colors, fw, bl=None) -> str:
             f'<section><h2>Fokus{part}</h2><div class="kpis">'
             f'<div><b>{fw["djup_antal"]}</b><span>pass på 10 min eller mer i samma fönster, '
             f'{aw.fmt_dur(fw["djup_s"])} totalt</span></div>'
-            f'<div><b>{fw["vaxlingar_h"]:.0f}</b><span>byten av app per aktiv timme</span></div>'
-            f'<div><b>{median}</b><span>i samma fönster innan du byter, median</span></div>'
+            f'<div><b>{fw["vaxlingar_h"]:.0f}</b><span>appbyten per aktiv timme</span></div>'
+            f'<div><b>{median}</b><span>mediantid i samma fönster innan du byter</span></div>'
             '</div></section>')
 
-    block_html = ""
+    blockering_html = ""
     if bl is not None:
         tot_l = sum(bl["laddade"].values())
         if tot_l >= 60:
-            intro = (f"{aw.fmt_dur(tot_l)} på blockerade sajter som ändå laddade. "
-                     "Antingen var blocket av, sajten var lyft, eller så går något runt blocket "
-                     "(vanligast är iCloud Private Relay i Safari).")
+            intro = (f"{aw.fmt_dur(tot_l)} på blockerade sajter som ändå laddades. Antingen var "
+                     "blockeringen avstängd, sajten tillfälligt öppnad, eller så kringgår något "
+                     "blockeringen (oftast Privat reläservice i Safari).")
         else:
-            intro = "Inget av det blockerade laddade den här veckan."
-        dod = (f'<div class="sub">{aw.fmt_dur(bl["dod"])} var flikar med felsida som bara låg framme.</div>'
+            intro = "Ingen blockerad sajt laddades den här veckan."
+        dod = (f'<div class="sub">{aw.fmt_dur(bl["dod"])} var blockerade sajter som bara visade en felsida.</div>'
                if bl["dod"] >= 60 else "")
-        block_html = (f'<section><h2>Blockerade sajter</h2><div>{intro}</div>{dod}'
+        blockering_html = (f'<section><h2>Blockerade sajter</h2><div>{intro}</div>{dod}'
                       + (f'<ul style="margin-top:10px">{toplist(bl["laddade"])}</ul>' if tot_l >= 60 else "")
                       + "</section>")
 
@@ -231,15 +236,15 @@ footer{{margin-top:24px;font-size:12px;color:var(--muted)}}
 @media (max-width:600px){{.two,.kpis{{grid-template-columns:1fr}}.two section{{margin-top:18px}}}}
 </style></head><body><main>
 <h1>Din vecka vid datorn</h1><div style="color:var(--muted)">{span}</div>
-<section><div class="big">{aw.fmt_dur(tot)}<small>aktiv tid, {aw.fmt_dur(tot / 7)} per dag</small></div>
+<section><div class="big">{aw.fmt_dur(tot)}<small>aktiv tid, i snitt {aw.fmt_dur(tot / 7)} per dag</small></div>
 <div>{trend(tot, ptot, " mot förra veckan") or '<span class="t">ingen jämförelse med förra veckan än</span>'}</div></section>
 <section><h2>Per dag</h2><div class="days">{dayhtml}</div></section>
 <section><h2>Kategorier</h2>{''.join(rows) or 'Ingen data'}</section>
 {fokus}
-{block_html}
+{blockering_html}
 <div class="two" style="margin-top:18px"><section><h2>Appar</h2><ul>{toplist(week["app"])}</ul></section>
 <section><h2>Sajter</h2><ul>{toplist(week["dom"])}</ul></section></div>
-<footer>Räknat lokalt ur ActivityWatch {datetime.now():%Y-%m-%d %H:%M}. Bara tid när du satt vid datorn räknas.</footer>
+<footer>Sammanställd på din dator från ActivityWatch {datetime.now():%Y-%m-%d %H:%M}. Bara tid då du satt vid datorn är med.</footer>
 </main></body></html>"""
 
 

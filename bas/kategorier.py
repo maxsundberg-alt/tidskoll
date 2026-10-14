@@ -3,16 +3,16 @@
 
     python3 kategorier.py visa [--dagar 7]     tid per kategori + största okategoriserade tiden
     python3 kategorier.py visa --fil FIL.json  samma sak, men med filens regler (provkörning, ändrar inget)
-    python3 kategorier.py exportera            skriv ut kategorierna som ActivityWatch kör nu (JSON)
+    python3 kategorier.py exportera            skriv ut kategorierna som ActivityWatch använder nu (JSON)
     python3 kategorier.py tillampa FIL.json    ersätt kategorierna i ActivityWatch med filens
 
 Arbetsgången när en regel ska läggas till: exportera till ~/tidskoll/kategorier.json,
-redigera filen, tillämpa, kör visa och läs vad som faktiskt hamnade var.
+redigera filen, provkör med visa --fil, och tillämpa när resultatet ser rätt ut.
 
 Så väljer ActivityWatch kategori: regexen söks mot både appnamnet och fönstertiteln.
 Den djupaste kategorin vinner. Vid lika djup vinner den som står sist i listan.
 
-Två fällor, eftersom ActivityWatch kör Rusts regexmotor och inte Pythons:
+Två fällor, eftersom ActivityWatch kör Rusts regexmotor, som skiljer sig från Pythons:
   - Skriv aldrig `\\|` för ett bokstavligt lodstreck. Det blir ett "eller" och
     matchar allt. Välj en annan del av titeln.
   - `\\b` beter sig inte som väntat. Använd mellanslag eller ^ och $ som ankare.
@@ -31,7 +31,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import aw  # noqa: E402
 
 BACKUP_DIR = Path.home() / "tidskoll" / "kategorier-backup"
-OKLASSAT = {"Uncategorized", "Webbläsning (oklassad)"}
 
 
 def period(days: int) -> str:
@@ -50,7 +49,7 @@ def visa(days: int, fil: str | None = None) -> int:
     unknown: dict[tuple, float] = {}
     for win, afk in aw.bucket_pairs(buckets):
         res = aw.query(aw.active_query(win, afk, rules, (
-            'unk = filter_keyvals(cats, "$category", [["Uncategorized"], ["Webbläsning (oklassad)"]]);'
+            'unk = filter_keyvals(cats, "$category", [["Uncategorized"], ["Webbläsning (okategoriserad)"]]);'
             'RETURN = {"cat": merge_events_by_keys(cats, ["$category"]), '
             '"unk": merge_events_by_keys(unk, ["app", "title"])};'
         )), [tp])[0]
@@ -62,13 +61,13 @@ def visa(days: int, fil: str | None = None) -> int:
             unknown[k] = unknown.get(k, 0) + e["duration"]
 
     total = sum(by_cat.values())
-    print(f"Aktiv tid senaste {days} dagarna: {aw.fmt_dur(total)}  ({len(cats)} kategorier)\n")
+    print(f"Aktiv tid de senaste {days} dagarna: {aw.fmt_dur(total)}  ({len(cats)} kategorier)\n")
     for k, s in sorted(by_cat.items(), key=lambda kv: kv[1], reverse=True):
         name = "Okategoriserat" if k == ("Uncategorized",) else " > ".join(k)
         pct = f"{100 * s / total:.0f} %" if total else ""
         print(f"  {aw.fmt_dur(s):>8} {pct:>5}  {name}")
 
-    print("\nStörsta tiden utan riktig kategori (kandidater för nya regler):")
+    print("\nMest tid utan riktig kategori (kandidater för nya regler):")
     rows = sorted(unknown.items(), key=lambda kv: kv[1], reverse=True)[:20]
     if not rows:
         print("  (inget, allt är kategoriserat)")
@@ -102,7 +101,7 @@ def tillampa(path: str) -> int:
 
     back = aw.active_categories()
     if [c["name"] for c in back] != [c["name"] for c in cats]:
-        print("Kategorierna skrevs men läses inte tillbaka likadant. Kontrollera i ActivityWatch.",
+        print("Kategorierna sparades, men det som läses tillbaka stämmer inte. Kontrollera i ActivityWatch.",
               file=sys.stderr)
         return 1
     print(f"{len(cats)} kategorier tillämpade. Förra uppsättningen sparad i {backup}")

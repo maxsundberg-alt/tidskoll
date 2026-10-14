@@ -1,6 +1,6 @@
-# Sajter som Tidskoll blockerar när blocket är påslaget. En domän per rad,
-# # är kommentar. www. och m. läggs till automatiskt; andra underdomäner
-# (till exempel music.youtube.com) måste stå på egen rad.
+# Sajter som Tidskoll blockerar när blockeringen är på. En domän per rad.
+# Rader som börjar med # räknas inte. www. och m. läggs till automatiskt, men andra
+# underdomäner (till exempel music.youtube.com) måste stå på egna rader.
 #
 # Sätt # framför det du inte vill blockera. Kör sedan "blockera.sh pa" igen.
 
@@ -33,7 +33,6 @@ flashback.org
 imgur.com
 i.imgur.com
 quora.com
-news.ycombinator.com
 
 # Nyheter
 aftonbladet.se

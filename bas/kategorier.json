@@ -1,10 +1,10 @@
 [
-  {"name": ["Webbläsning (oklassad)"], "rule": {"type": "regex", "regex": "Safari|Google Chrome|Firefox|Arc|Microsoft Edge|Brave Browser|Vivaldi", "ignore_case": false}, "data": {"color": "#95a5a6"}},
+  {"name": ["Webbläsning (okategoriserad)"], "rule": {"type": "regex", "regex": "Safari|Google Chrome|Firefox|Arc|Microsoft Edge|Brave Browser|Vivaldi", "ignore_case": false}, "data": {"color": "#95a5a6"}},
   {"name": ["System"], "rule": {"type": "regex", "regex": "^Finder$|System Settings|Systeminställningar|Activity Monitor|Aktivitetskontroll|App Store|^Calculator$|^Kalkylator$|1Password|Bitwarden|Raycast|Alfred|Spotlight", "ignore_case": false}, "data": {"color": "#7f8c8d"}},
 
   {"name": ["Arbete"], "rule": {"type": "none"}, "data": {"color": "#2e8b57"}},
-  {"name": ["Arbete", "Kod & bygge"], "rule": {"type": "regex", "regex": "Visual Studio Code|^Code$|Cursor|Xcode|^Terminal$|iTerm|Warp|Ghostty|GitHub|GitLab|localhost", "ignore_case": false}, "data": {"color": "#1f6b3b"}},
-  {"name": ["Arbete", "Dokument & anteckningar"], "rule": {"type": "regex", "regex": "Google Docs|Google Dokument|Google Sheets|Google Kalkylark|Google Slides|Google Presentationer|Microsoft Word|Microsoft Excel|Microsoft PowerPoint|^Pages$|^Numbers$|^Keynote$|Notion|Obsidian|^Notes$|^Anteckningar$|Dropbox|Google Drive", "ignore_case": false}, "data": {"color": "#27ae60"}},
+  {"name": ["Arbete", "Kod och bygge"], "rule": {"type": "regex", "regex": "Visual Studio Code|^Code$|Cursor|Xcode|^Terminal$|iTerm|Warp|Ghostty|GitHub|GitLab|localhost", "ignore_case": false}, "data": {"color": "#1f6b3b"}},
+  {"name": ["Arbete", "Dokument och anteckningar"], "rule": {"type": "regex", "regex": "Google Docs|Google Dokument|Google Sheets|Google Kalkylark|Google Slides|Google Presentationer|Microsoft Word|Microsoft Excel|Microsoft PowerPoint|^Pages$|^Numbers$|^Keynote$|Notion|Obsidian|^Notes$|^Anteckningar$|Dropbox|Google Drive", "ignore_case": false}, "data": {"color": "#27ae60"}},
   {"name": ["Arbete", "Design"], "rule": {"type": "regex", "regex": "Figma|Canva|Photoshop|Illustrator|Affinity|Sketch|Framer", "ignore_case": false}, "data": {"color": "#3aa564"}},
 
   {"name": ["AI-verktyg"], "rule": {"type": "regex", "regex": "Claude|ChatGPT|Gemini|Perplexity|Copilot|Mistral|DeepSeek|Grok|Midjourney|NotebookLM", "ignore_case": false}, "data": {"color": "#0e9b9b"}},
@@ -24,7 +24,7 @@
   {"name": ["Konsumtion"], "rule": {"type": "none"}, "data": {"color": "#b03a3a"}},
   {"name": ["Konsumtion", "Sociala medier"], "rule": {"type": "regex", "regex": "Instagram|TikTok|Facebook|Snapchat|Reddit|Pinterest|Threads|Flashback", "ignore_case": false}, "data": {"color": "#d24b4b"}},
   {"name": ["Konsumtion", "X/Twitter"], "rule": {"type": "regex", "regex": "x\\.com| / X$|Twitter", "ignore_case": false}, "data": {"color": "#c0392b"}},
-  {"name": ["Konsumtion", "Video & musik"], "rule": {"type": "regex", "regex": "YouTube|Netflix|HBO Max|Disney\\+|SVT Play|Viaplay|Prime Video|TV4 Play|Twitch|^Spotify$|Apple Music|^Podcasts$|^Podcaster$", "ignore_case": false}, "data": {"color": "#a03ca0"}},
+  {"name": ["Konsumtion", "Video och musik"], "rule": {"type": "regex", "regex": "YouTube|Netflix|HBO Max|Disney\\+|SVT Play|Viaplay|Prime Video|TV4 Play|Twitch|^Spotify$|Apple Music|^Podcasts$|^Podcaster$", "ignore_case": false}, "data": {"color": "#a03ca0"}},
   {"name": ["Konsumtion", "Nyheter"], "rule": {"type": "regex", "regex": "Aftonbladet|Expressen|Dagens Nyheter|dn\\.se|Svenska Dagbladet|svd\\.se|SVT Nyheter|Omni|Dagens industri|di\\.se|Breakit|Göteborgs-Posten|Sydsvenskan", "ignore_case": false}, "data": {"color": "#943126"}},
   {"name": ["Konsumtion", "Shopping"], "rule": {"type": "regex", "regex": "Amazon|Zalando|Blocket|Tradera|Prisjakt|IKEA|Apotea|Adlibris|Vinted|Temu", "ignore_case": false}, "data": {"color": "#cb4335"}}
 ]

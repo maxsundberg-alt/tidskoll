@@ -2,8 +2,8 @@
 """En dags aktiva tid ur ActivityWatch, som JSON.
 
 Tid per app, per kategori (med underkategorier) och per webbadress. Bara tid
-när du satt vid datorn räknas. Används av Claude-skillen för att svara på
-frågor om en dag, och av skärmanalysen som det kvantitativa lagret.
+när du satt vid datorn räknas. Används av skillen tidskoll för att svara på
+frågor om en dag, och av skärmdumpsanalysen som grund för tiden.
 
     python3 dag.py                # idag
     python3 dag.py 2026-10-08     # valfritt datum

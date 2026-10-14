@@ -35,9 +35,9 @@ def bucket_pairs(buckets: dict) -> list[tuple[str, str]]:
     """Alla (fönster, afk)-par, ett per datornamn.
 
     ActivityWatch lägger datornamnet sist i bucket-id:t (`aw-watcher-window_<namn>`).
-    Byter datorn namn, till exempel när den växlar nätverk, startar en ny bucket.
-    En vecka kan därför ligga i två buckets. Paren överlappar inte i tid, så att
-    summera dem dubbelräknar inget.
+    Byter datorn namn, till exempel när den byter nätverk, skapas en ny bucket.
+    En vecka kan därför ligga i två buckets. Paren överlappar inte i tid, så
+    ingenting räknas dubbelt när de summeras.
     """
     wins = {bid.split("_", 1)[1]: bid for bid, b in buckets.items()
             if b.get("type") == "currentwindow" and "_" in bid}
@@ -45,7 +45,7 @@ def bucket_pairs(buckets: dict) -> list[tuple[str, str]]:
             if b.get("type") == "afkstatus" and "_" in bid}
     pairs = [(wins[h], afks[h]) for h in wins if h in afks]
     if not pairs:
-        raise RuntimeError("Hittar ingen fönster- och afk-bucket. Kör ActivityWatch?")
+        raise RuntimeError("Hittar ingen fönster- eller närvarodata från ActivityWatch. Är appen igång?")
     return pairs
 
 
@@ -82,7 +82,7 @@ def rules(categories: list[dict]) -> list:
 
 
 def active_query(win: str, afk: str, rules_: list, extra: str) -> list[str]:
-    """Query-början som ger aktiv tid: fönsterhändelser när du inte är borta."""
+    """De inledande frågeraderna, som ger aktiv tid: fönsterhändelser när du inte är borta."""
     return [
         f'afk = flood(query_bucket("{afk}"));',
         f'win = flood(query_bucket("{win}"));',

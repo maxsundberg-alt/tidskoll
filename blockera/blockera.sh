@@ -1,22 +1,22 @@
 #!/bin/bash
-# Tidskoll, blockering. Stänger sajterna i ~/tidskoll/blocklista.txt i alla
-# webbläsare på datorn, genom att peka dem mot 0.0.0.0 i /etc/hosts.
-# Sajten laddar inte, oavsett webbläsare, inkognito eller app som hämtar från den.
+# Tidskoll, blockering. Blockerar sajterna i ~/tidskoll/blocklista.txt i alla
+# webbläsare på datorn, genom att peka dem mot 0.0.0.0 i /etc/hosts. Sajten går
+# inte att öppna, oavsett webbläsare, inkognitoläge eller app som hämtar från den.
 #
-#   bash blockera.sh pa              slå på blocket
-#   bash blockera.sh av              ta bort blocket
-#   bash blockera.sh lyft <domän>    öppna en sajt tillfälligt, resten står kvar
-#   bash blockera.sh ater <domän>    stäng den igen
+#   bash blockera.sh pa              slå på blockeringen
+#   bash blockera.sh av              stäng av blockeringen
+#   bash blockera.sh lyft <domän>    öppna en sajt tillfälligt, resten förblir blockerade
+#   bash blockera.sh ater <domän>    blockera den igen
 #   bash blockera.sh status          visa läget
 #
-# Att skriva /etc/hosts kräver administratörslösenordet. Det skrivs i macOS egen
-# ruta, så varken skriptet eller Claude ser det.
+# Att skriva till /etc/hosts kräver datorns lösenord. Det skrivs i macOS egen
+# ruta, så varken skriptet eller agenten ser det.
 set -euo pipefail
 
 ROOT="$HOME/tidskoll"
-LISTA="${TIDSKOLL_BLOCKLISTA:-$ROOT/blocklista.txt}"
+LISTA="$ROOT/blocklista.txt"
 UNDANTAG="$ROOT/blockera-undantag.txt"
-HOSTS="${TIDSKOLL_HOSTS:-/etc/hosts}"
+HOSTS=/etc/hosts
 START="# === TIDSKOLL-BLOCK START ==="
 END="# === TIDSKOLL-BLOCK SLUT ==="
 
@@ -29,7 +29,7 @@ domaner() {  # listan plus www. och m. för varje rad, utan dubbletter
   done | sort -u
 }
 
-lyft_() {  # sant om domänen eller en domän den ligger under är lyft
+lyft_() {  # sant om domänen, eller en domän den ligger under, är tillfälligt öppnad
   local d="$1" e
   while IFS= read -r e; do
     [ -z "$e" ] && continue
@@ -52,9 +52,6 @@ block() {
 skriv() {  # nytt innehåll för /etc/hosts på stdin
   local tmp; tmp="$(mktemp "${TMPDIR:-/tmp}/tidskoll-hosts.XXXXXX")"
   cat > "$tmp"
-  if [ -w "$HOSTS" ]; then          # testfil, eller körs redan som root
-    cat "$tmp" > "$HOSTS"; rm -f "$tmp"; return 0
-  fi
   # Byt filen i ett steg (mv), så att inget program läser en halvskriven fil.
   # Originalet sparas en gång som /etc/hosts.tidskoll-original.
   osascript - "$tmp" <<'OSA' >/dev/null
@@ -71,21 +68,21 @@ pa_nu() { grep -qxF "$START" "$HOSTS" 2>/dev/null; }
 
 case "${1:-status}" in
   pa)
-    [ -s "$LISTA" ] || { echo "Blocklistan saknas: $LISTA"; exit 1; }
+    [ -s "$LISTA" ] || { echo "Blocklistan saknas eller är tom: $LISTA"; exit 1; }
     { utan_block; block; } | skriv
-    echo "✓ Blocket är på. $(antal) adresser blockerade."
-    echo "  Redan öppna flikar kan ladda en stund till. Stäng webbläsaren helt (Cmd+Q) om något fortfarande syns."
+    echo "✓ Blockeringen är på. $(antal) adresser är blockerade."
+    echo "  Flikar som redan var öppna kan fortsätta fungera en stund. Avsluta webbläsaren (Cmd+Q) om något fortfarande syns."
     ;;
   av)
     utan_block | skriv
-    echo "✓ Blocket är av."
+    echo "✓ Blockeringen är avstängd."
     ;;
   lyft)
     [ $# -ge 2 ] || { echo "Ange en domän: bash $0 lyft youtube.com"; exit 1; }
     mkdir -p "$ROOT"; touch "$UNDANTAG"
     grep -qxF "$2" "$UNDANTAG" || echo "$2" >> "$UNDANTAG"
     pa_nu && { utan_block; block; } | skriv
-    echo "✓ $2 är öppen. Stäng den igen med: bash $0 ater $2"
+    echo "✓ $2 är tillfälligt öppen. Blockera den igen med: bash $0 ater $2"
     ;;
   ater)
     [ $# -ge 2 ] || { echo "Ange en domän: bash $0 ater youtube.com"; exit 1; }
@@ -97,7 +94,7 @@ case "${1:-status}" in
     echo "✓ $2 är blockerad igen."
     ;;
   status)
-    if pa_nu; then echo "Blocket: på ($(antal) adresser)"; else echo "Blocket: av"; fi
+    if pa_nu; then echo "Blockeringen: på ($(antal) adresser)"; else echo "Blockeringen: av"; fi
     if [ -n "$(rader "$UNDANTAG")" ]; then echo "Tillfälligt öppna:"; rader "$UNDANTAG" | sed 's/^/  /'; fi
     ;;
   *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;

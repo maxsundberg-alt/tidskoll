@@ -7,8 +7,8 @@ Edge, Vivaldi). Firefox går inte att fråga via AppleScript; där finns
 ActivityWatchs eget tillägg aw-watcher-web.
 
 Den frågar bara webbläsaren när ActivityWatch redan säger att webbläsaren är
-den aktiva appen och att du sitter vid datorn. Varje webbläsare ber om lov en
-gång ("python3 vill styra Safari"), och det är den enda behörighet som behövs.
+den aktiva appen och att du sitter vid datorn. macOS frågar en gång per webbläsare
+om python3 får styra den, och det är den enda behörighet som behövs.
 
 Körs i bakgrunden av launchd (com.tidskoll.webblasare).
 

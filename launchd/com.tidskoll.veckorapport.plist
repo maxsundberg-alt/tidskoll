@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <!-- Mall. Söndag 20:00. Sov datorn då körs den när den vaknar. -->
+    <!-- Mall. Söndag 20:00. Om datorn sover då körs rapporten när den vaknar. -->
     <key>Label</key>
     <string>com.tidskoll.veckorapport</string>
     <key>ProgramArguments</key>
