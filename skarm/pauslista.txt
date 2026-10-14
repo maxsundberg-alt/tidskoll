@@ -1,0 +1,38 @@
+# Pauslista för Tidskoll. När appnamnet eller adressen innehåller en rad här tas
+# ingen skärmdump. Vilken app som var öppen loggas ändå, så tiden räknas.
+#
+# En delsträng per rad. Rader som börjar med # används inte.
+# Ändringar gäller direkt, ingen omstart behövs.
+#
+# Listan är påslagen från början. Vill du att något ska fotas: sätt # framför raden.
+
+# Lösenord och inloggning
+1Password
+Bitwarden
+Dashlane
+Passwords
+Lösenord
+Keychain Access
+Nyckelhanterare
+BankID
+Freja
+
+# Banker
+avanza.se
+nordnet.se
+swedbank.se
+handelsbanken.se
+nordea.se
+seb.se
+lansforsakringar.se
+icabanken.se
+skandia.se
+danskebank.se
+sparbank
+
+# Betalning och myndigheter
+klarna.com
+paypal.com
+skatteverket.se
+forsakringskassan.se
+1177.se

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleIdentifier</key>
+    <string>com.tidskoll.skarm</string>
+    <key>CFBundleName</key>
+    <string>Tidskoll</string>
+    <key>CFBundleExecutable</key>
+    <string>tidskoll</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>LSUIElement</key>
+    <true/>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>Tidskoll läser vilken app och vilket fönster som är aktivt, och adressen i webbläsaren, för att logga hur datorn används.</string>
+</dict>
+</plist>
