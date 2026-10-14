@@ -119,7 +119,7 @@ slagits på; Cmd+Q på webbläsaren löser det.
 
 ## `status`, `paus`, `fortsatt`
 
-- Status: `for l in webblasare veckorapport skarm nattanalys; do printf '%s: ' $l; launchctl print gui/$(id -u)/com.tidskoll.$l 2>/dev/null | grep -m1 'state =' || echo 'inte installerad'; done`,
+- Status: `for l in webblasare veckorapport skarm; do printf '%s: ' $l; launchctl print gui/$(id -u)/com.tidskoll.$l 2>/dev/null | grep -m1 'state =' || echo 'inte installerad'; done`,
   plus `curl -s localhost:5600/api/0/info`, dagens antal bilder och `tail -5 ~/tidskoll/skarm/daemon.log`.
   0 bilder fast skärmjobbet kör betyder nästan alltid att behörigheten för skärminspelning saknas.
 - Paus: `launchctl bootout gui/$(id -u)/com.tidskoll.skarm`

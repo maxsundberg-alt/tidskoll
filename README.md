@@ -23,7 +23,7 @@ Agenten frågar vilka delar du vill ha, installerar, och kontrollerar att allt f
 den säger att den är klar. Några behörigheter i Systeminställningar måste du ge själv.
 Agenten säger exakt var.
 
-## Fyra delar
+## Tre delar
 
 **Grundnivån** bygger på [ActivityWatch](https://activitywatch.net), en gratis tidmätare med
 öppen källkod. Tidskoll lägger till det som gör datan användbar:
@@ -51,9 +51,9 @@ på telefonen, och fallgroparna som får ett block att läcka.
 glesare när inget ändras och inte alls när du är borta. När du ber om en analys tittar agenten på de 10 till 30
 bilder som säger mest om dagen och letar efter mönster: menyer där ett kortkommando finns,
 samma kopiera och klistra in om och om igen, ett verktyg som har ett bättre alternativ.
-Ett mönster blir ett förslag först när det setts tre gånger. Efter en vecka ger
-`tidskoll effektivisera` de förslag som sparar mest tid. Analysen kan också köras automatiskt
-varje kväll.
+Analysen görs bara när du ber om den. Ett mönster blir ett förslag först när det setts tre
+gånger, så be om en analys av några olika dagar. Sedan ger `tidskoll effektivisera` de
+förslag som sparar mest tid.
 
 ## Integritet
 

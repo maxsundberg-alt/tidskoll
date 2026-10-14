@@ -14,12 +14,11 @@ eller Linux. Säg det i så fall och avbryt.
 
 Fråga sedan användaren, i ett och samma meddelande:
 
-1. **Vilka delar?** Fyra nivåer, där bara den första är nödvändig:
+1. **Vilka delar?** Tre nivåer, där bara den första är nödvändig:
    - Grundnivån mäter tid per app, fönster, webbsida och kategori, och ger en veckorapport.
    - Blockering stänger utvalda sajter i alla webbläsare. Veckorapporten visar sedan om
      något ändå laddade.
    - Skärmdumpar var femte sekund, så att du kan se hur hen arbetar och föreslå förbättringar.
-   - Nattlig analys av skärmdumparna, som kör din agent automatiskt varje kväll.
    Rekommendera grundnivån först. Resten kan läggas till senare.
 2. **Om skärmdumpar:** förklara rakt att allt på skärmen fotas, även privata meddelanden,
    och att bilderna stannar på datorn. Undantaget är de 10 till 30 bilder per dag som du
@@ -128,19 +127,6 @@ Fällor:
    loggraden har `"img": false`.
 
 Fungerar något inte: felsök nu. Säg aldrig att det är klart på en halv installation.
-
-## Nattlig analys (valfritt)
-
-`bash installera.sh nattanalys` schemalägger en analys av dagens skärmdumpar klockan 23:30.
-Den fyller på `~/tidskoll/observationer.md`, och det är det som gör att `tidskoll effektivisera`
-får något att arbeta med efter en vecka. Varje körning använder användarens AI-plan. Fråga först.
-
-Analysen körs av kommandot i `~/tidskoll/nattanalys.conf`. Finns Claude Code skrivs det in
-automatiskt. Kör du som en annan agent: ta reda på hur du själv körs utan att fråga om lov
-(headless, icke-interaktivt) genom att läsa din egen `--help` eller dokumentation, och skriv in
-det på raden `AGENT_KOMMANDO='...'`, med `"$UPPDRAG"` där uppdraget ska stå. Agenten behöver få
-köra `python3`, läsa bilder och skriva filer i `~/tidskoll`. Testa kommandot en gång för hand
-innan du säger att det är klart: `bash ~/tidskoll/bin/nattanalys.sh`.
 
 ## Avsluta
 

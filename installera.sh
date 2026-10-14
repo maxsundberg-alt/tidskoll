@@ -5,7 +5,6 @@
 #                                           och skillen tidskoll. --kategorier ersätter
 #                                           ActivityWatchs kategorier med startindelningen.
 #   bash installera.sh skarm [--bygg-om]    skärmdumpar var femte sekund (valfri nivå)
-#   bash installera.sh nattanalys           en AI-agent analyserar dagens skärmdumpar 23:30 (valfri)
 #   bash installera.sh blockera             blockering av sajter i alla webbläsare (valfri,
 #                                           slås på separat med ~/tidskoll/bin/blockera.sh pa)
 #   bash installera.sh status               vad som körs, och dagens data
@@ -100,8 +99,8 @@ cmd_skarm() {
   touch "$ROOT/skarm/daemon.log"
   [ -f "$ROOT/observationer.md" ] || printf '# Återkommande mönster\n\n' > "$ROOT/observationer.md"
   [ -f "$ROOT/pauslista.txt" ] || cp "$SRC/skarm/pauslista.txt" "$ROOT/pauslista.txt"
-  cp "$SRC/skarm/capture-loop.sh" "$SRC/skarm/nattanalys.sh" "$SRC/skarm/block.py" "$BIN/"
-  chmod +x "$BIN/capture-loop.sh" "$BIN/nattanalys.sh"
+  cp "$SRC/skarm/capture-loop.sh" "$SRC/skarm/block.py" "$BIN/"
+  chmod +x "$BIN/capture-loop.sh"
   ok "skärmdumpsloopen i $BIN, pauslistan i $ROOT/pauslista.txt"
 
   # Bygg och signera appen bara om den saknas. En ny signatur gör behörigheten ogiltig.
@@ -125,24 +124,6 @@ cmd_skarm() {
   say "  Starta sedan om: bash installera.sh fortsatt"
 }
 
-cmd_nattanalys() {
-  mkdir -p "$BIN" "$ROOT/logg"
-  cp "$SRC/skarm/nattanalys.sh" "$BIN/" && chmod +x "$BIN/nattanalys.sh"
-  if [ ! -f "$ROOT/nattanalys.conf" ]; then
-    if command -v claude >/dev/null || [ -x "$HOME/.claude/local/claude" ]; then
-      cat > "$ROOT/nattanalys.conf" <<'CONF'
-# Kommandot som kör en AI-agent utan att fråga. $UPPDRAG är uppdraget.
-AGENT_KOMMANDO='claude -p "$UPPDRAG" --allowedTools "Bash(python3:*),Read,Write,Edit"'
-CONF
-      ok "nattanalys.conf skriven för Claude Code"
-    else
-      printf '# Kommandot som kör en AI-agent utan att fråga. $UPPDRAG är uppdraget.\nAGENT_KOMMANDO=\n' > "$ROOT/nattanalys.conf"
-      say "  ! Fyll i AGENT_KOMMANDO i $ROOT/nattanalys.conf med din agents headless-kommando."
-    fi
-  fi
-  load_agent com.tidskoll.nattanalys
-}
-
 cmd_blockera() {
   need_mac
   mkdir -p "$BIN"
@@ -161,7 +142,7 @@ agent_state() {
 cmd_status() {
   local day; day="$(date +%F)"
   if aw_up; then say "ActivityWatch:       kör"; else say "ActivityWatch:       svarar inte"; fi
-  for l in webblasare veckorapport skarm nattanalys; do
+  for l in webblasare veckorapport skarm; do
     printf '%-20s %s\n' "$l:" "$(agent_state com.tidskoll.$l)"
   done
   if [ -d "$ROOT/skarm/days/$day" ]; then
@@ -186,7 +167,7 @@ cmd_avinstallera() {
     say "Tar bort sajtblocket (macOS frågar efter lösenordet)…"
     bash "$BIN/blockera.sh" av
   fi
-  for l in webblasare veckorapport skarm nattanalys; do
+  for l in webblasare veckorapport skarm; do
     launchctl bootout "$GUI/com.tidskoll.$l" 2>/dev/null || true
     rm -f "$AGENTS/com.tidskoll.$l.plist"
   done
@@ -200,11 +181,10 @@ cmd_avinstallera() {
 case "${1:-}" in
   bas)          shift; cmd_bas "$@" ;;
   skarm)        shift; cmd_skarm "$@" ;;
-  nattanalys)   cmd_nattanalys ;;
   blockera)     cmd_blockera ;;
   status)       cmd_status ;;
   paus)         cmd_paus ;;
   fortsatt)     cmd_fortsatt ;;
   avinstallera) cmd_avinstallera ;;
-  *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac
