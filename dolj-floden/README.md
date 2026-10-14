@@ -5,24 +5,22 @@ vanligt i övrigt. De körs i Safari på Mac och iPhone med appen
 [Userscripts](https://apps.apple.com/app/userscripts/id1463298887), som är gratis och har
 [öppen källkod](https://github.com/quoid/userscripts).
 
-| Skript | Vad det gör |
-|---|---|
-| `linkedin-dolj-flode.user.js` | Döljer inläggsflödet på LinkedIns startsida. Rutan för att skriva inlägg, meddelanden, profiler och alla andra sidor fungerar som vanligt. Där flödet brukade vara står "Flödet är dolt." |
+Just nu finns ett skript, för LinkedIn (`linkedin-dolj-flode.user.js`). Det döljer
+inläggsflödet på startsidan. Rutan för att skriva inlägg, meddelanden, profiler och alla andra
+sidor fungerar som vanligt, och där flödet brukade vara står "Flödet är dolt."
 
 Skripten påverkar bara webbsidorna i Safari. LinkedIns app på telefonen påverkas inte.
 
 ## Så kommer skriptet igång
 
-Be din agent installera det, eller kör `bash installera.sh floden` i den nedladdade
-Tidskoll-mappen.
-Skriptet läggs i mappen `Userscripts` i iCloud Drive, så att samma fil används på Mac och iPhone.
-Saknas iCloud Drive läggs det i `~/tidskoll/userscripts`.
+Be din agent installera det. Skriptet läggs i mappen Userscripts i iCloud Drive, så att samma
+fil används på Mac och iPhone.
 
 Resten gör du själv, eftersom det är inställningar i Safari:
 
 **Mac**
 1. Installera Userscripts från App Store och öppna appen.
-2. Välj mappen där skriptet ligger som skriptmapp.
+2. Välj mappen Userscripts i iCloud Drive som skriptmapp.
 3. Safari → Inställningar → Tillägg: kryssa i Userscripts.
 4. Öppna linkedin.com, klicka på Userscripts-ikonen bredvid adressfältet och tillåt sajten.
 
@@ -43,6 +41,5 @@ Stäng av det andra för samma sajt.
 
 ## Fler sajter
 
-Varje sajt får en egen fil i samma mapp. Be din agent skriva en ny med det här skriptet som
-mall. Det som behöver bytas är `@match` (vilken sajt), hur startsidan känns igen och vilka
-delar av sidan som ska döljas.
+Be din agent skriva ett skript för en annan sajt. Det hamnar i samma mapp, och sedan tillåter
+du den nya sajten i Userscripts.

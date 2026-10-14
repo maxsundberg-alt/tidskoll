@@ -162,6 +162,10 @@ def render(week, prev, days, start, end, colors, fw, bl=None) -> str:
     pcats = top_cats(prev)
     day_tot = [(d, total(p)) for d, p in days]
     peak = max((s for _, s in day_tot), default=0) or 1
+    # Snittet räknas på dagar med data, så att första veckan efter installationen blir rätt.
+    dagar_med_data = sum(1 for _, s in day_tot if s > 0) or 1
+    snitt = f"i snitt {aw.fmt_dur(tot / dagar_med_data)} per dag" + (
+        f", räknat på {dagar_med_data} dagar" if dagar_med_data < 7 else "")
 
     rows = []
     for name, s in cats:
@@ -189,11 +193,12 @@ def render(week, prev, days, start, end, colors, fw, bl=None) -> str:
         median = f"{round(m * 60)} s" if m < 1 else f"{m:.1f} min".replace(".", ",")
         fokus = (
             f'<section><h2>Fokus{part}</h2><div class="kpis">'
-            f'<div><b>{fw["djup_antal"]}</b><span>pass på 10 min eller mer i samma fönster, '
-            f'{aw.fmt_dur(fw["djup_s"])} totalt</span></div>'
-            f'<div><b>{fw["vaxlingar_h"]:.0f}</b><span>appbyten per aktiv timme</span></div>'
-            f'<div><b>{median}</b><span>mediantid i samma fönster innan du byter</span></div>'
-            '</div></section>')
+            f'<div><b>{fw["djup_antal"]}</b><span>gånger du stannade minst 10 minuter i samma '
+            f'fönster, {aw.fmt_dur(fw["djup_s"])} totalt</span></div>'
+            f'<div><b>{fw["vaxlingar_h"]:.0f}</b><span>byten mellan appar per timme vid datorn</span></div>'
+            f'<div><b>{median}</b><span>så länge du brukar stanna i ett fönster innan du byter</span></div>'
+            '</div><div class="sub" style="margin-top:12px">Siffrorna säger mest jämförda med '
+            'dina egna tidigare veckor.</div></section>')
 
     blockering_html = ""
     if bl is not None:
@@ -204,7 +209,8 @@ def render(week, prev, days, start, end, colors, fw, bl=None) -> str:
                      "blockeringen (oftast Privat reläservice i Safari).")
         else:
             intro = "Ingen blockerad sajt laddades den här veckan."
-        dod = (f'<div class="sub">{aw.fmt_dur(bl["dod"])} var blockerade sajter som bara visade en felsida.</div>'
+        dod = (f'<div class="sub">Under {aw.fmt_dur(bl["dod"])} låg en blockerad sajt framme men visade '
+               'bara en felsida. Den tiden räknas inte.</div>'
                if bl["dod"] >= 60 else "")
         blockering_html = (f'<section><h2>Blockerade sajter</h2><div>{intro}</div>{dod}'
                       + (f'<ul style="margin-top:10px">{toplist(bl["laddade"])}</ul>' if tot_l >= 60 else "")
@@ -236,7 +242,7 @@ footer{{margin-top:24px;font-size:12px;color:var(--muted)}}
 @media (max-width:600px){{.two,.kpis{{grid-template-columns:1fr}}.two section{{margin-top:18px}}}}
 </style></head><body><main>
 <h1>Din vecka vid datorn</h1><div style="color:var(--muted)">{span}</div>
-<section><div class="big">{aw.fmt_dur(tot)}<small>aktiv tid, i snitt {aw.fmt_dur(tot / 7)} per dag</small></div>
+<section><div class="big">{aw.fmt_dur(tot)}<small>aktiv tid, {snitt}</small></div>
 <div>{trend(tot, ptot, " mot förra veckan") or '<span class="t">ingen jämförelse med förra veckan än</span>'}</div></section>
 <section><h2>Per dag</h2><div class="days">{dayhtml}</div></section>
 <section><h2>Kategorier</h2>{''.join(rows) or 'Ingen data'}</section>
@@ -244,7 +250,7 @@ footer{{margin-top:24px;font-size:12px;color:var(--muted)}}
 {blockering_html}
 <div class="two" style="margin-top:18px"><section><h2>Appar</h2><ul>{toplist(week["app"])}</ul></section>
 <section><h2>Sajter</h2><ul>{toplist(week["dom"])}</ul></section></div>
-<footer>Sammanställd på din dator från ActivityWatch {datetime.now():%Y-%m-%d %H:%M}. Bara tid då du satt vid datorn är med.</footer>
+<footer>Sammanställd på din dator från ActivityWatch {datetime.now():%Y-%m-%d %H:%M}. Bara tid då du satt vid datorn är med. Vill du veta mer, fråga din AI-agent, till exempel "vad gjorde jag i tisdags?".</footer>
 </main></body></html>"""
 
 

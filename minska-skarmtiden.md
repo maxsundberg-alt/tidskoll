@@ -12,13 +12,12 @@ Verktygen nedan är ordnade från hårdast till mjukast. De flesta behöver en b
 
 För sajter du inte behöver alls: video, sociala medier, nyheter och forum.
 
-Tidskoll kan blockera sajterna i `~/tidskoll/blocklista.txt` i alla webbläsare på datorn
-samtidigt, även i inkognitoläge och i webbläsare du installerar senare. Det sker i
-`/etc/hosts`, datorns egen adressbok, där sajterna pekas mot en adress som inte finns. Be din
-agent installera blockeringen, eller kör `bash installera.sh blockera` i den nedladdade mappen.
+Tidskoll kan blockera sajter i alla webbläsare på datorn samtidigt, även i inkognitoläge och
+i webbläsare du installerar senare. Det sker i datorns egen adressbok för webbsidor, där
+sajterna pekas mot en adress som inte finns. Be din agent installera blockeringen.
 
-Att öppna en blockerad sajt igen (`blockera.sh lyft <domän>`) kräver datorns lösenord varje
-gång. Det är meningen: att öppna en sajt ska kräva att du bestämmer dig.
+Att öppna en blockerad sajt igen kräver datorns lösenord varje gång. Det är meningen: att
+öppna en sajt ska kräva att du bestämmer dig.
 
 Blockeringen gäller bara datorn. För telefonen, se avsnitt 4.
 
@@ -61,20 +60,18 @@ Blockeringen i avsnitt 1 gäller bara datorn. På telefonen:
 ## Vanliga fel
 
 - **Privat reläservice (iCloud Private Relay) kringgår blockeringen i Safari.** Trafiken går
-  via Apples egna servrar, och då används aldrig `/etc/hosts`. Går en blockerad sajt ändå att
+  via Apples egna servrar, och då används aldrig datorns adressbok. Går en blockerad sajt ändå att
   öppna i Safari är det nästan alltid det här. Inställningen finns under Systeminställningar →
   ditt namn högst upp → iCloud → Privat reläservice.
 - **Flikar som redan var öppna fortsätter fungera en stund** efter att blockeringen slagits
   på. Avsluta webbläsaren helt (Cmd+Q) och prova med en sajt som inte var öppen.
 - **Underdomäner räknas för sig.** Tidskoll lägger till `www.` och `m.` automatiskt, men till
   exempel `music.youtube.com` och `se.pinterest.com` måste stå på egna rader i listan.
-- **En öppen flik är inte samma sak som en sajt som faktiskt laddades.** En blockerad sajt som
-  är den aktiva fliken visar en felsida, och den tiden mäts ändå. Veckorapporten skiljer på
-  de två med hjälp av sidans titel. Säkert fungerar det bara i Safari på engelska, där felsidan
-  heter "Failed to open page". I andra webbläsare och på andra språk kan felsidan heta något
-  annat, och då kan den tiden räknas som att sajten laddades.
-- **Tillfälliga undantag blir lätt permanenta.** En sajt som öppnas för en kväll förblir öppen
-  tills någon blockerar den igen. Kör `blockera.sh status` då och då, eller be din agent göra det.
+- **En blockerad flik kan räknas som tid på sajten.** Veckorapporten försöker skilja en felsida
+  från en sajt som faktiskt laddades, men det fungerar säkert bara i Safari på engelska. Ser
+  siffran konstig ut, fråga din agent.
+- **Undantag blir lätt permanenta.** En sajt som öppnas för en kväll förblir öppen tills någon
+  blockerar den igen. Be din agent visa vilka sajter som är öppnade då och då.
 
 ## Mät att det håller
 

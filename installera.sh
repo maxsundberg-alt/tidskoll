@@ -28,13 +28,13 @@ say()  { printf '%s\n' "$*"; }
 ok()   { printf '  ✓ %s\n' "$*"; }
 fail() { printf '  ✗ %s\n' "$*" >&2; exit 1; }
 
-load_agent() {   # $1 = label
+load_agent() {   # $1 = launchd-etikett, $2 = vad som skrivs ut när den är laddad
   local dst="$AGENTS/$1.plist"
   mkdir -p "$AGENTS"
   sed "s#__HOME__#$HOME#g" "$SRC/launchd/$1.plist" > "$dst"
   launchctl bootout "$GUI/$1" 2>/dev/null || true
   launchctl bootstrap "$GUI" "$dst"
-  ok "$1 startad"
+  ok "$2"
 }
 
 aw_up() { curl -sf --max-time 3 http://localhost:5600/api/0/info >/dev/null; }
@@ -60,7 +60,7 @@ cmd_bas() {
     for _ in $(seq 1 60); do aw_up && break; sleep 2; done
   fi
   aw_up || fail "ActivityWatch startade inte. Öppna appen själv och godkänn den om macOS frågar."
-  ok "ActivityWatch svarar på localhost:5600"
+  ok "ActivityWatch är igång"
   # Starta vid inloggning
   osascript -e 'tell application "System Events" to if not (exists login item "ActivityWatch") then make login item at end with properties {path:"/Applications/ActivityWatch.app", hidden:true}' >/dev/null
   ok "ActivityWatch startar vid inloggning"
@@ -74,8 +74,8 @@ cmd_bas() {
 
 
   # 3. Bakgrundsjobb
-  load_agent com.tidskoll.webblasare
-  load_agent com.tidskoll.veckorapport
+  load_agent com.tidskoll.webblasare "webbläsarbevakaren är igång"
+  load_agent com.tidskoll.veckorapport "veckorapporten är schemalagd till söndagar klockan 20"
 
   # 4. Skillen
   for d in "${SKILL_DIRS[@]}"; do
@@ -83,10 +83,11 @@ cmd_bas() {
   done
   # Samma instruktioner som vanlig fil, för agenter som inte läser skills.
   cp "$SRC/skill/tidskoll/SKILL.md" "$ROOT/SKILL.md"
-  ok "skillen tidskoll i ~/.claude/skills och ~/.agents/skills, och som ~/tidskoll/SKILL.md"
+  ok "instruktionerna till din AI-agent är installerade"
 
   say ""
-  say "Klart. macOS frågar en gång per webbläsare om python3 får styra den: svara OK."
+  say "Klart. När du klickar i en webbläsare frågar macOS om \"python3\" får styra den."
+  say "Det är Tidskoll som läser av adressen. Svara OK. Frågan kommer en gång per webbläsare."
 }
 
 cmd_skarm() {
@@ -94,7 +95,7 @@ cmd_skarm() {
   say "▸ Tidskoll, skärmdumpar"
   xcode-select -p >/dev/null 2>&1 || fail "Xcode Command Line Tools saknas. Kör: xcode-select --install"
   if ! command -v cwebp >/dev/null && [ ! -x /opt/homebrew/bin/cwebp ] && [ ! -x /usr/local/bin/cwebp ]; then
-    if command -v brew >/dev/null; then brew install webp; else say "  (cwebp saknas, bilderna sparas som JPEG och blir ungefär tre gånger större)"; fi
+    if command -v brew >/dev/null; then brew install webp; else say "  (verktyget för små bilder saknas, så bilderna sparas som JPEG och tar ungefär tre gånger mer plats)"; fi
   fi
 
   mkdir -p "$BIN" "$ROOT/skarm/dagar" "$ROOT/anteckningar"
@@ -118,7 +119,7 @@ cmd_skarm() {
     ok "Tidskoll.app byggd och signerad i ~/Applications"
   fi
 
-  load_agent com.tidskoll.skarm
+  load_agent com.tidskoll.skarm "skärmdumparna är igång"
   say ""
   say "Nästa steg gör du i Systeminställningar:"
   say "  Integritet och säkerhet → Skärm- och systemljudinspelning → + → Cmd+Shift+G → ~/Applications → Tidskoll.app"
@@ -148,7 +149,10 @@ cmd_floden() {
 
 agent_state() {
   local out
-  out="$(launchctl print "$GUI/$1" 2>/dev/null)" || { printf 'inte installerad'; return; }
+  if ! out="$(launchctl print "$GUI/$1" 2>/dev/null)"; then
+    if [ -f "$AGENTS/$1.plist" ]; then printf 'pausad'; else printf 'inte installerad'; fi
+    return
+  fi
   if [[ "$out" == *"state = running"* ]]; then printf 'kör'; else printf 'schemalagd, väntar på nästa körning'; fi
 }
 
@@ -168,12 +172,15 @@ cmd_status() {
   if [ -s "$ROOT/skarm/daemon.log" ]; then say "Senaste fel:"; tail -3 "$ROOT/skarm/daemon.log" | sed 's/^/  /'; fi
 }
 
-cmd_paus()     { launchctl bootout "$GUI/com.tidskoll.skarm" 2>/dev/null && ok "skärmdumparna pausade" || say "redan pausade"; }
+cmd_paus() {
+  [ -f "$AGENTS/com.tidskoll.skarm.plist" ] || fail "skärmdumparna är inte installerade"
+  launchctl bootout "$GUI/com.tidskoll.skarm" 2>/dev/null && ok "skärmdumparna är pausade" || say "skärmdumparna var redan pausade"
+}
 cmd_fortsatt() {
   [ -f "$AGENTS/com.tidskoll.skarm.plist" ] || fail "skärmdumparna är inte installerade"
   launchctl bootout "$GUI/com.tidskoll.skarm" 2>/dev/null || true
   launchctl bootstrap "$GUI" "$AGENTS/com.tidskoll.skarm.plist"
-  ok "skärmdumparna igång"
+  ok "skärmdumparna är igång"
 }
 
 cmd_avinstallera() {

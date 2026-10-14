@@ -9,34 +9,51 @@ sätts upp av din AI-agent. Det har fyra delar:
   veckorapporten visar om blockeringen höll.
 - **Dölja flöden.** LinkedIn-flödet försvinner, medan meddelanden, profiler och resten av
   LinkedIn fungerar som vanligt.
-- **Skärmdumpar.** Din agent ser hur du arbetar och föreslår vad som går att göra snabbare.
+- **Skärmdumpar.** Datorn tar en bild av skärmen var femte sekund, och din agent
+  föreslår vad som går att göra snabbare.
 
 Bara tidmätningen är nödvändig. Resten väljer du till eller låter bli.
 
-Allt körs på din egen Mac. Det finns ingen server och inget konto, och datan lämnar inte
-datorn av sig själv.
+Allt körs på din egen Mac. Det finns ingen server och inget konto. Det enda som lämnar datorn
+är det du ber din AI-agent titta på, och det går till AI-tjänsten du redan använder.
+
+Tidskoll är gratis. Det som kostar är din AI-agent, och analyser av skärmdumpar använder mer
+av den än vanliga frågor. Du kan ta bort allt när du vill genom att be agenten avinstallera
+Tidskoll.
 
 ## Det här behövs
 
 - En Mac.
-- En AI-agent som kan köra kommandon i terminalen, till exempel Claude Code, Codex, Cursor
-  eller Gemini CLI. Agenten sköter installationen, och efteråt är det den du frågar om din tid.
-- Helst [Homebrew](https://brew.sh). Utan det får du ladda ner ActivityWatch själv.
+- En AI-agent som kan köra program på din dator, till exempel Claude Code, Codex, Cursor eller
+  Gemini CLI. Chattjänster i webbläsaren, som claude.ai eller chatgpt.com, kan inte det och
+  räcker inte.
+- För blockeringen och skärmdumparna: att du kan godkänna ändringar med datorns lösenord. På
+  en jobbdator som styrs av en IT-avdelning går det kanske inte.
+
+Har du programmet Homebrew installeras tidmätaren ActivityWatch av sig själv. Annars visar
+agenten hur du laddar ner den.
 
 ## Installera
 
-1. Ladda ner mappen: grön knapp **Code → Download ZIP**, och packa upp den. Mappen heter då
-   `tidskoll-main`. Med `git clone` heter den `tidskoll`.
-2. Öppna mappen i din agent, i terminalen till exempel `cd tidskoll-main` och sedan `claude`,
-   `codex` eller `gemini`.
-3. Skriv:
+1. Ladda ner Tidskoll: klicka på den gröna knappen **Code** högst upp på den här sidan och
+   välj **Download ZIP**. Öppna filen i Hämtade filer, så packas den upp till mappen
+   `tidskoll-main`.
+2. Öppna mappen i din agent.
+   - I en app, till exempel Claude-appen eller Cursor: välj mappen `tidskoll-main` i Hämtade
+     filer som den mapp agenten ska arbeta i.
+   - I Terminalen: skriv `cd ~/Downloads/tidskoll-main` och tryck Retur. Skriv sedan namnet på
+     din agent, till exempel `claude`, `codex` eller `gemini`, och tryck Retur.
+3. Skriv till agenten:
 
 > Läs AGENTS.md i den här mappen och sätt upp Tidskoll på min dator.
 
 Agenten frågar vilka delar du vill ha, installerar och kontrollerar att allt fungerar innan
-den säger att den är klar. Några behörigheter i Systeminställningar måste du ge själv, och
-agenten säger exakt var. När installationen är klar kan den nedladdade mappen slängas. Vill du
-lägga till en del senare laddar du ner den igen.
+den säger att den är klar. Den ber om lov innan den kör något på datorn: läs vad den vill göra
+och svara ja. Några behörigheter i Systeminställningar ger du själv, och agenten säger exakt
+var.
+
+Spara den nedladdade mappen tills du vet vilka delar du vill ha. Den behövs om du vill lägga
+till något senare.
 
 ## Använda
 
@@ -45,13 +62,12 @@ Fråga din agent med egna ord, till exempel:
 - "Vart tog tiden vägen igår?"
 - "Hur mycket tid la jag på mejl den här veckan?"
 - "Gå igenom tiden som saknar kategori."
-- "Öppna YouTube tillfälligt."
+- "Öppna YouTube, jag behöver det för en kurs." (kräver blockeringen)
 - "Analysera gårdagen." (kräver skärmdumpar)
+- "Pausa skärmdumparna."
 
-Agenten använder skillen `tidskoll`, en instruktionsfil som installeras där de flesta agenter
-letar. Den kan också anropas direkt, med `/tidskoll` i Claude Code och Cursor eller
-`$tidskoll` i Codex, följt av `dag`, `vecka`, `kategorier`, `analysera`, `effektivisera`,
-`blockera`, `lyft`, `ater`, `status`, `paus` eller `fortsatt`.
+Du behöver inte komma ihåg några kommandon. Agenten hittar instruktionerna för Tidskoll av
+sig själv.
 
 Veckorapporten öppnas av sig själv i webbläsaren varje söndag klockan 20. Sover datorn då
 öppnas den när den vaknar.
@@ -100,7 +116,7 @@ inte alls när du är borta. När du ber om en analys tittar agenten på de 10 t
 säger mest om dagen och letar efter mönster: menyer där det finns ett kortkommando, att du
 kopierar och klistrar in samma sak om och om igen, eller ett verktyg som har ett bättre
 alternativ. Ett mönster blir ett förslag först när det setts tre gånger, så be om analyser av
-några olika dagar. Sedan ger "tidskoll effektivisera" de förslag som sparar mest tid.
+några olika dagar. Be sedan agenten om de förslag som sparar mest tid.
 
 Analysen görs bara när du ber om den.
 
@@ -114,19 +130,20 @@ ut innan sparas som `/etc/hosts.tidskoll-original`.
 **Dölja flöden** körs helt i Safari och skickar ingenting någonstans.
 
 **Skärmdumparna** fotar allt som syns på skärmen, även privata meddelanden. Bilderna och loggen
-sparas i `~/tidskoll/skarm/` och raderas efter 30 dagar, medan agentens anteckningar sparas.
+sparas i mappen tidskoll i din hemmapp och raderas efter 30 dagar, medan agentens anteckningar
+sparas. Bilderna tar ungefär 5–80 MB per dag, alltså högst ett par GB totalt.
 Det som lämnar datorn är det agenten läser när du ber om en analys: loggrader och de utvalda
 bilderna. De skickas till leverantören av AI-modellen du använder, precis som allt annat du
 visar agenten.
 
-Pauslistan `~/tidskoll/pauslista.txt` är ifylld från början och stoppar skärmdumpar av
-lösenordshanterare, BankID, banker, betalsidor, myndigheter och vården. Lägg till egna rader,
-en per app eller adress.
+En pauslista är ifylld från början och stoppar skärmdumpar av lösenordshanterare, BankID,
+banker, betalsidor, myndigheter och vården. Be agenten lägga till fler appar eller sajter.
 
-Vill du stoppa alla skärmdumpar en stund: be agenten pausa dem, eller kör
-`bash ~/tidskoll/bin/installera.sh paus` och sedan `bash ~/tidskoll/bin/installera.sh fortsatt`.
+Vill du stoppa alla skärmdumpar en stund, be agenten pausa dem.
 
 ## Var allt ligger
+
+Det här behöver du inte kunna, men för den som vill veta:
 
 ```
 ~/tidskoll/
@@ -150,10 +167,12 @@ används på Mac och iPhone. Saknas iCloud Drive ligger de i `~/tidskoll/userscr
 
 ## Ta bort
 
-`bash ~/tidskoll/bin/installera.sh avinstallera` stänger av allt och tar bort blockeringen,
-skripten, appen och skillen. Det här ligger kvar tills du tar bort det själv:
+Be din agent ta bort Tidskoll. Den stänger av allt och tar bort blockeringen, skripten och
+skärmdumpsappen, och frågar sedan om resten ska bort. Utan agent: kör
+`bash ~/tidskoll/bin/installera.sh avinstallera` i Terminalen. Det här ligger kvar tills du
+tar bort det själv:
 
-- din data i `~/tidskoll/`
+- din data, i mappen tidskoll i din hemmapp
 - ActivityWatch
 - skripten som döljer flöden, i mappen `Userscripts` (eller stäng av Userscripts i Safari)
 

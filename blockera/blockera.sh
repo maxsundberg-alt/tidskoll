@@ -63,14 +63,18 @@ OSA
   rm -f "$tmp"
 }
 
-antal() { grep -c '^0\.0\.0\.0 ' <(awk -v s="$START" -v e="$END" '$0==s{on=1;next} $0==e{on=0} on' "$HOSTS") || true; }
+antal() {  # sajter i listan som är blockerade nu, utan www.- och m.-varianterna
+  local n=0 d
+  while IFS= read -r d; do lyft_ "$d" || n=$((n + 1)); done < <(rader "$LISTA")
+  echo "$n"
+}
 pa_nu() { grep -qxF "$START" "$HOSTS" 2>/dev/null; }
 
 case "${1:-status}" in
   pa)
     [ -s "$LISTA" ] || { echo "Blocklistan saknas eller är tom: $LISTA"; exit 1; }
     { utan_block; block; } | skriv
-    echo "✓ Blockeringen är på. $(antal) adresser är blockerade."
+    echo "✓ Blockeringen är på. $(antal) sajter är blockerade."
     echo "  Flikar som redan var öppna kan fortsätta fungera en stund. Avsluta webbläsaren (Cmd+Q) om något fortfarande syns."
     ;;
   av)
@@ -82,7 +86,7 @@ case "${1:-status}" in
     mkdir -p "$ROOT"; touch "$UNDANTAG"
     grep -qxF "$2" "$UNDANTAG" || echo "$2" >> "$UNDANTAG"
     pa_nu && { utan_block; block; } | skriv
-    echo "✓ $2 är tillfälligt öppen. Blockera den igen med: bash $0 ater $2"
+    echo "✓ $2 är öppen. Den förblir öppen tills du blockerar den igen."
     ;;
   ater)
     [ $# -ge 2 ] || { echo "Ange en domän: bash $0 ater youtube.com"; exit 1; }
@@ -90,12 +94,16 @@ case "${1:-status}" in
       grep -vxF "$2" "$UNDANTAG" > "$UNDANTAG.tmp" || true
       mv "$UNDANTAG.tmp" "$UNDANTAG"
     fi
-    pa_nu && { utan_block; block; } | skriv
-    echo "✓ $2 är blockerad igen."
+    if pa_nu; then
+      { utan_block; block; } | skriv
+      echo "✓ $2 är blockerad igen."
+    else
+      echo "$2 är borttagen från undantagen. Blockeringen är avstängd, så ingen sajt blockeras just nu."
+    fi
     ;;
   status)
-    if pa_nu; then echo "Blockeringen: på ($(antal) adresser)"; else echo "Blockeringen: av"; fi
-    if [ -n "$(rader "$UNDANTAG")" ]; then echo "Tillfälligt öppna:"; rader "$UNDANTAG" | sed 's/^/  /'; fi
+    if pa_nu; then echo "Blockeringen: på ($(antal) sajter)"; else echo "Blockeringen: av"; fi
+    if [ -n "$(rader "$UNDANTAG")" ]; then echo "Öppnade som undantag:"; rader "$UNDANTAG" | sed 's/^/  /'; fi
     ;;
   *) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

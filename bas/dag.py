@@ -102,6 +102,12 @@ def main() -> int:
                 "igar": today - timedelta(days=1)}.get(arg)
     date_str = date_str.strftime("%Y-%m-%d") if date_str else arg
     try:
+        datetime.strptime(date_str, "%Y-%m-%d")
+    except ValueError:
+        print(json.dumps({"datum": arg, "fel": "Okänt datum. Ange idag, igår eller ÅÅÅÅ-MM-DD."},
+                         ensure_ascii=False))
+        return 0
+    try:
         out = build(date_str)
     except Exception as e:
         out = {"datum": date_str, "fel": f"ActivityWatch svarar inte: {e}"}

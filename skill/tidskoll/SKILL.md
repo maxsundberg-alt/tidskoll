@@ -1,6 +1,6 @@
 ---
 name: tidskoll
-description: Svara på hur användaren lägger sin tid vid datorn, utifrån Tidskoll (tidmätning med ActivityWatch, blockering av sajter, dolda flöden i Safari och valfria skärmdumpar på den egna Macen). Använd vid "/tidskoll", "vart tog tiden vägen", "hur mycket tid la jag på X", "vad gjorde jag igår", "veckorapport", "kategorisera min tid", "vad kan jag effektivisera", "analysera min skärmtid", "pausa skärmdumparna", "blockera eller öppna en sajt", "LinkedIn-flödet syns igen", "dölj flödet på en sajt", eller "tidskoll dag|vecka|kategorier|analysera|effektivisera|blockera|lyft|ater|status|paus|fortsatt".
+description: Svara på hur användaren lägger sin tid vid datorn, utifrån Tidskoll (tidmätning med ActivityWatch, blockering av sajter, dolda flöden i Safari och valfria skärmdumpar på den egna Macen). Använd vid "/tidskoll", "vart tog tiden vägen", "hur mycket tid la jag på X", "vad gjorde jag igår", "veckorapport", "kategorisera min tid", "vad kan jag effektivisera", "analysera min skärmtid", "pausa skärmdumparna", "blockera eller öppna en sajt", "LinkedIn-flödet syns igen", "dölj flödet på en sajt", "ta bort Tidskoll", eller "tidskoll dag|vecka|kategorier|analysera|effektivisera|blockera|lyft|ater|status|paus|fortsatt|avinstallera".
 ---
 
 # Tidskoll
@@ -19,7 +19,10 @@ Pythons standardbibliotek. Kör dem med `python3`.
 | `~/tidskoll/observationer.md` | återkommande mönster och hur många gånger de setts |
 | `~/tidskoll/pauslista.txt` | appar och adresser där ingen skärmdump tas |
 
-Svara på svenska, i klartext och med siffror. Hitta aldrig på en siffra: saknas data, säg det.
+Användaren är troligen ingen tekniker och ser allt du skriver. Svara på svenska, i klartext
+och med siffror. Visa inga kommandon, sökvägar, filnamn eller JSON om hen inte ber om det, och
+använd inte ord som bucket, regex eller hosts-fil. Säg vad du gör och vad du kom fram till.
+Hitta aldrig på en siffra: saknas data, säg det.
 Läs aldrig rå `log.jsonl` eller hela API-svar i kontexten. Låt skripten räkna och läs deras JSON.
 
 ## `dag [datum]` (standard när användaren frågar om en dag)
@@ -50,7 +53,9 @@ ska hamna i "Okategoriserat" eller "Webbläsning (okategoriserad)".
    En överkategori utan egen regel får `{"type": "none"}`.
 5. Provkör: `python3 ~/tidskoll/bin/kategorier.py visa --fil ~/tidskoll/kategorier.json`.
    Läs vad som faktiskt hamnade var. En regel som ser rätt ut kan fånga för mycket.
-6. När användaren godkänt: `python3 ~/tidskoll/bin/kategorier.py tillampa ~/tidskoll/kategorier.json`.
+6. Beskriv resultatet av provkörningen i klartext, till exempel "Allt med Kund X i titeln räknas
+   nu som Arbete > Kund X, 3 h 20 min förra veckan", och fråga om det stämmer. Visa inte regeln.
+   När användaren sagt ja: `python3 ~/tidskoll/bin/kategorier.py tillampa ~/tidskoll/kategorier.json`.
    Den sparar en kopia av de gamla kategorierna i `~/tidskoll/kategorier-backup/` först.
 
 Så väljer ActivityWatch: regexen söks i både appnamn och fönstertitel. Den djupaste
@@ -85,6 +90,8 @@ Mönster som bara syns på bilderna (menyer, fildialoger) kommer då inte med.
 5. Uppdatera `~/tidskoll/observationer.md`. Finns mönstret redan: öka antalet med ett och
    uppdatera datumet. Annars lägg till en rad:
    `- [antal: 1, senast: 2026-10-08] Öppnar kalkylarket via Finder varje morgon; ett bokmärke eller kortkommando sparar ungefär 20 s per gång. (Sett: 2026-10-08/09-14-20.webp)`
+6. Berätta kort för användaren vad dagen innehöll och vilka mönster du noterade. Säg att ett
+   förslag kommer när ett mönster har setts tre gånger.
 
 Integritet: bilderna du öppnar skickas till leverantören av modellen du kör på. Öppna aldrig
 en bild vars loggrad visar en bank, en lösenordshanterare eller annat som borde ha stått på
@@ -113,8 +120,9 @@ de inte går att öppna i någon webbläsare. Kräver att `bash installera.sh bl
 - Lägga till en sajt: skriv domänen i listan och kör `pa` igen. `www.` och `m.` läggs till
   automatiskt, andra underdomäner måste stå på egna rader.
 
-Varje ändring visar macOS lösenordsruta, och användaren skriver datorns lösenord där. Be
-aldrig om det i chatten. Vill användaren öppna en blockerad sajt: gör det, men säg först hur
+Varje ändring visar macOS lösenordsruta, och användaren skriver datorns lösenord där. Säg det
+innan du kör kommandot, och be aldrig om lösenordet i chatten. En öppnad sajt förblir öppen
+tills användaren ber dig blockera den igen. Säg det när du öppnar den. Vill användaren öppna en blockerad sajt: gör det, men säg först hur
 mycket tid sajten fick de senaste sju dagarna enligt `dag.py` eller veckorapporten, så att
 användaren har siffran framför sig när hen bestämmer sig.
 
@@ -139,7 +147,24 @@ flödet på LinkedIns startsida.
 ## `status`, `paus`, `fortsatt`
 
 - Läget: `bash ~/tidskoll/bin/installera.sh status`. Visar ActivityWatch, bakgrundsjobben,
-  blockeringen, dagens antal skärmdumpar och de senaste felen. Är skärmdumpsjobbet igång
-  men antalet bilder 0, saknas nästan alltid behörigheten att spela in skärmen.
+  blockeringen, dagens antal skärmdumpar och de senaste felen. Sammanfatta i en eller två
+  meningar, läs inte upp utskriften. Är skärmdumparna igång men antalet bilder 0, saknas
+  nästan alltid behörigheten att spela in skärmen.
 - Pausa skärmdumparna: `bash ~/tidskoll/bin/installera.sh paus`
 - Fortsätt: `bash ~/tidskoll/bin/installera.sh fortsatt`
+
+## Lägga till en del, eller ta bort Tidskoll
+
+Vill användaren lägga till en del (blockering, dölja LinkedIn-flödet eller skärmdumpar) behövs
+den nedladdade Tidskoll-mappen. Har hen kvar den: öppna den och följ `AGENTS.md`. Annars: be
+hen ladda ner den igen från GitHub-sidan och öppna mappen här.
+
+Vill användaren ta bort Tidskoll:
+1. `bash ~/tidskoll/bin/installera.sh avinstallera`. Stänger av allt och tar bort blockeringen
+   (macOS frågar då efter lösenordet), skripten, skärmdumpsappen och instruktionerna.
+2. Fråga om datan också ska bort: rapporter, kategorier och eventuella skärmdumpar i mappen
+   tidskoll i hemmappen. Ta bort den först efter ett ja.
+3. Fråga om tidmätaren ActivityWatch ska bort. Den kan avinstalleras via Homebrew
+   (`brew uninstall --cask activitywatch`) eller genom att appen flyttas till papperskorgen.
+4. Skriptet som döljer LinkedIn-flödet ligger kvar i mappen Userscripts i iCloud Drive. Säg
+   att hen kan ta bort filen där, eller stänga av Userscripts i Safari.
