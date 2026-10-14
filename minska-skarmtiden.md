@@ -27,8 +27,13 @@ Blockeringen gäller bara datorn. För telefonen, se avsnitt 4.
 För sajter du behöver i jobbet men där flödet äter tid. LinkedIn är det vanligaste exemplet:
 du behöver meddelanden och profiler, men inte flödet.
 
-**SocialFocus** är ett webbläsartillägg som döljer utvalda delar av sajter, till exempel
-flöden, rekommendationer, siffror och annonser. Det fungerar bland annat på LinkedIn,
+**Tidskolls eget skript** döljer flödet på LinkedIns startsida och lämnar resten av sajten
+orörd. Det körs i Safari på Mac och iPhone via den kostnadsfria appen Userscripts. Se
+[dolj-floden/README.md](dolj-floden/README.md). Fler sajter går att lägga till som egna skript
+i samma mapp, och din agent kan skriva dem åt dig.
+
+**SocialFocus** är ett färdigt webbläsartillägg som döljer utvalda delar av många sajter,
+till exempel flöden, rekommendationer, siffror och annonser. Det fungerar bland annat på LinkedIn,
 YouTube, X, Instagram, Reddit, Facebook och Gmail, och finns för Safari (via App Store) och för
 Chrome och Firefox. Safari-versionen kostar en engångssumma, och det finns en dyrare
 Pro-version. Det fungerar bara i webbläsaren. I apparna gör det ingenting. Ett sätt att

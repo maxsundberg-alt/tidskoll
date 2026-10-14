@@ -123,6 +123,19 @@ Private Relay) först, den skickar trafiken förbi `/etc/hosts`. Flikar som reda
 kan också fortsätta fungera en stund efter att blockeringen slagits på. Cmd+Q på
 webbläsaren löser det.
 
+## Dölja flöden
+
+Skript som döljer flöden i Safari ligger i mappen `Userscripts` i iCloud Drive (eller i
+`~/tidskoll/userscripts`) och körs av appen Userscripts. `linkedin-dolj-flode.user.js` döljer
+flödet på LinkedIns startsida.
+
+- Visas flödet igen: LinkedIn har troligen ändrat sidan. Öppna linkedin.com, ta reda på vilken
+  del av sidan som nu innehåller flödet och uppdatera väljarna i skriptet. Bygg hellre på
+  fasta märkningar som `data-testid` än på klassnamn, som LinkedIn slumpar.
+- Vill användaren dölja flödet på en annan sajt: skriv en ny fil i samma mapp med LinkedIn-
+  skriptet som mall. Byt `@match`, hur startsidan känns igen och vilka delar som döljs.
+  Användaren behöver sedan tillåta den nya sajten i Userscripts.
+
 ## `status`, `paus`, `fortsatt`
 
 - Läget: `bash ~/tidskoll/bin/installera.sh status`. Visar ActivityWatch, bakgrundsjobben,

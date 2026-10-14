@@ -3,7 +3,7 @@
 Se exakt vart tiden vid datorn tar vägen. Tidskoll mäter vilken app, vilket fönster och
 vilken webbsida du har framför dig, sorterar tiden i kategorier och ger dig en
 veckorapport varje söndag. Den kan också blockera sajter du vill hålla dig borta från och
-visa om blockeringen faktiskt höll. Vill du gå längre kan den ta skärmdumpar, så att din
+visa om blockeringen faktiskt höll, och dölja LinkedIn-flödet utan att stänga LinkedIn. Vill du gå längre kan den ta skärmdumpar, så att din
 AI-agent kan se hur du arbetar och föreslå vad som går att göra snabbare.
 
 Allt körs på din egen Mac. Det finns ingen server och inget konto, och datan lämnar inte
@@ -26,7 +26,7 @@ Agenten frågar vilka delar du vill ha, installerar och kontrollerar att allt fu
 den säger att den är klar. Några behörigheter i Systeminställningar måste du ge själv.
 Agenten säger exakt var.
 
-## Tre delar
+## Fyra delar
 
 **Grundnivån** bygger på [ActivityWatch](https://activitywatch.net), en gratis tidmätare med
 öppen källkod. Tidskoll lägger till det som gör datan användbar:
@@ -49,9 +49,15 @@ tiden kommer inte med.
 **Blockeringen** är valfri. Sajterna i en lista som du själv bestämmer över går inte längre
 att öppna i någon webbläsare på datorn. Att öppna en av dem igen kräver datorns lösenord,
 och veckorapporten visar hur mycket tid som ändå gick till blockerade sajter.
-Guiden [minska-skarmtiden.md](minska-skarmtiden.md) tar upp fler verktyg: SocialFocus som
-döljer flöden, One Sec som lägger in en paus, Skärmtid på telefonen och de vanligaste skälen
-till att en blockering inte håller.
+Guiden [minska-skarmtiden.md](minska-skarmtiden.md) tar upp fler verktyg: One Sec som
+lägger in en paus, Skärmtid på telefonen och de vanligaste skälen till att en blockering
+inte håller.
+
+**Dölja flöden** är valfritt. För sajter du behöver i jobbet går det inte att blockera hela
+sajten. Tidskoll har i stället ett skript som döljer flödet på LinkedIns startsida, medan
+meddelanden, profiler och rutan för att skriva inlägg fungerar som vanligt. Det körs i Safari
+på Mac och iPhone med den kostnadsfria appen Userscripts. Mer i
+[dolj-floden/README.md](dolj-floden/README.md).
 
 **Skärmdumpsnivån** är också valfri. Tidskoll tar då en bild av skärmen var femte sekund i
 låg upplösning, glesare när inget ändras och inte alls när du är borta. När du ber om en
@@ -101,7 +107,8 @@ Vill du stoppa alla skärmdumpar en stund: be agenten pausa dem, eller kör
 
 `bash ~/tidskoll/bin/installera.sh avinstallera` stänger av allt och tar bort blockeringen,
 skripten, appen och skillen. Din data i `~/tidskoll/` och ActivityWatch själv ligger kvar
-tills du tar bort dem.
+tills du tar bort dem. Skripten som döljer flöden ligger kvar i mappen `Userscripts` i
+iCloud Drive. Ta bort filen där, eller stäng av Userscripts i Safari.
 
 ## Tack
 

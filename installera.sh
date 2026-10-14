@@ -6,6 +6,7 @@
 #   bash installera.sh skarm [--bygg-om]    skärmdumpar var femte sekund (valfri nivå)
 #   bash installera.sh blockera             blockering av sajter i alla webbläsare (valfri,
 #                                           slås på separat med ~/tidskoll/bin/blockera.sh pa)
+#   bash installera.sh floden               skript som döljer LinkedIn-flödet i Safari (valfri)
 #   bash installera.sh status               vad som körs, och dagens data
 #   bash installera.sh paus | fortsatt      stoppa eller starta skärmdumparna
 #   bash installera.sh avinstallera         ta bort allt utom din data
@@ -134,6 +135,17 @@ cmd_blockera() {
   say "Blockeringen är inte påslagen än. Gå igenom listan och slå sedan på blockeringen: bash $BIN/blockera.sh pa"
 }
 
+cmd_floden() {
+  need_mac; need_src
+  local icloud="$HOME/Library/Mobile Documents/com~apple~CloudDocs" dst
+  if [ -d "$icloud" ]; then dst="$icloud/Userscripts"; else dst="$ROOT/userscripts"; fi
+  mkdir -p "$dst"
+  cp "$SRC"/dolj-floden/*.user.js "$dst/"
+  ok "skripten i $dst"
+  say "Nästa steg gör du själv: installera Userscripts från App Store, välj mappen ovan som"
+  say "skriptmapp, slå på tillägget i Safari och tillåt linkedin.com. Se dolj-floden/README.md."
+}
+
 agent_state() {
   local out
   out="$(launchctl print "$GUI/$1" 2>/dev/null)" || { printf 'inte installerad'; return; }
@@ -187,9 +199,10 @@ case "${1:-}" in
   bas)          shift; cmd_bas "$@" ;;
   skarm)        shift; cmd_skarm "$@" ;;
   blockera)     cmd_blockera ;;
+  floden)       cmd_floden ;;
   status)       cmd_status ;;
   paus)         cmd_paus ;;
   fortsatt)     cmd_fortsatt ;;
   avinstallera) cmd_avinstallera ;;
-  *) sed -n '2,14p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+  *) sed -n '2,15p' "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
 esac

@@ -14,10 +14,12 @@ eller Linux. Säg det i så fall och avbryt.
 
 Fråga sedan användaren, i ett och samma meddelande:
 
-1. **Vilka delar?** Tidskoll har tre delar, och bara den första är nödvändig:
+1. **Vilka delar?** Tidskoll har fyra delar, och bara den första är nödvändig:
    - Grundnivån mäter tid per app, fönster, webbsida och kategori, och ger en veckorapport.
    - Blockeringen gör att utvalda sajter inte går att öppna i någon webbläsare. Veckorapporten
      visar sedan om någon av dem ändå laddades.
+   - Dölja flöden döljer flödet på LinkedIns startsida i Safari, så att LinkedIn går att
+     använda för meddelanden och profiler utan att fastna i flödet.
    - Skärmdumpsnivån tar en bild av skärmen var femte sekund, så att du kan se hur hen
      arbetar och föreslå förbättringar.
    Rekommendera grundnivån först. Resten kan läggas till senare.
@@ -101,6 +103,21 @@ Kontrollera:
 Säg också att en sajt öppnas tillfälligt med `blockera.sh lyft <domän>` och blockeras igen
 med `blockera.sh ater <domän>`, och att båda kräver datorns lösenord. Det är meningen.
 
+## Dölja flöden (bara om användaren sagt ja)
+
+Kör `bash installera.sh floden`. Det lägger skripten från `dolj-floden/` i mappen
+`Userscripts` i iCloud Drive (eller i `~/tidskoll/userscripts` om iCloud Drive saknas).
+Har användaren redan en Userscripts-mapp: kopiera filen dit i stället.
+
+Resten är inställningar som användaren gör själv. Gå igenom stegen i `dolj-floden/README.md`
+med hen: installera Userscripts från App Store, välj mappen, slå på tillägget i Safari och
+tillåt linkedin.com. På iPhone även "Behåll nedladdad" på mappen i Filer-appen.
+
+Kontrollera genom att be användaren öppna linkedin.com i Safari och säga vad hen ser. Under
+rutan för att skriva inlägg ska det stå "Flödet är dolt." Har hen ett annat tillägg som
+döljer flöden, till exempel SocialFocus, ska det stängas av för linkedin.com så att de inte
+krockar.
+
 ## Skärmdumpsnivån (bara om användaren sagt ja)
 
 Kräver Xcode Command Line Tools. Kontrollera med `xcode-select -p`. Saknas de, kör
@@ -147,6 +164,6 @@ Berätta för användaren:
 - Att skärmdumparna bara analyseras när hen ber om det, och att ett mönster blir ett förslag
   först när det setts tre gånger.
 - Att `minska-skarmtiden.md` beskriver verktyg för telefonen och för sajter som inte går
-  att blockera, som One Sec, SocialFocus och Skärmtid.
+  att blockera, som One Sec och Skärmtid.
 - Att den nedladdade mappen kan slängas. Status, paus och avinstallation sköts sedan med
   `bash ~/tidskoll/bin/installera.sh status|paus|fortsatt|avinstallera`.
