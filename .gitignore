@@ -1,8 +1,3 @@
 __pycache__/
 *.pyc
 .DS_Store
-# Data hör aldrig hemma här
-*.webp
-*.jpg
-*.png
-log.jsonl

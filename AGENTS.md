@@ -15,14 +15,14 @@ eller Linux. Säg det i så fall och avbryt.
 Fråga sedan användaren, i ett och samma meddelande:
 
 1. **Vilka delar?** Tidskoll har fyra delar, och bara den första är nödvändig:
-   - Grundnivån mäter tid per app, fönster, webbsida och kategori, och ger en veckorapport.
-   - Blockeringen gör att utvalda sajter inte går att öppna i någon webbläsare. Veckorapporten
-     visar sedan om någon av dem ändå laddades.
-   - Dölja flöden döljer flödet på LinkedIns startsida i Safari, så att LinkedIn går att
+   - Tidmätning: tid per app, fönster, webbsida och kategori, och en veckorapport.
+   - Blockering: utvalda sajter går inte att öppna i någon webbläsare. Veckorapporten visar
+     sedan om någon av dem ändå laddades.
+   - Dölja flöden: flödet på LinkedIns startsida döljs i Safari, så att LinkedIn går att
      använda för meddelanden och profiler utan att fastna i flödet.
-   - Skärmdumpsnivån tar en bild av skärmen var femte sekund, så att du kan se hur hen
-     arbetar och föreslå förbättringar.
-   Rekommendera grundnivån först. Resten kan läggas till senare.
+   - Skärmdumpar: en bild av skärmen var femte sekund, så att du kan se hur hen arbetar
+     och föreslå förbättringar.
+   Rekommendera tidmätningen först. Resten kan läggas till senare.
 2. **Om skärmdumpar:** säg rakt ut att allt på skärmen fotas, även privata meddelanden,
    och att bilderna stannar på datorn. Undantaget är de 10 till 30 bilder per dag som du
    tittar på vid en analys. De skickas till leverantören av AI-modellen du kör på. Pauslistan
@@ -31,7 +31,7 @@ Fråga sedan användaren, i ett och samma meddelande:
 3. **Har hen redan ActivityWatch?** Om hen har egna kategorier där får de inte skrivas över
    utan att hen har sagt ja.
 
-## Grundnivån
+## Tidmätning
 
 Kör `bash installera.sh bas` i den här mappen. Skriptet:
 - installerar ActivityWatch med Homebrew om den saknas (finns inte Homebrew: be användaren
@@ -60,7 +60,7 @@ Den gamla uppsättningen sparas alltid i `~/tidskoll/kategorier-backup/` innan n
 Om macOS stoppar ActivityWatch första gången ("kan inte öppnas"): be användaren öppna
 Systeminställningar → Integritet och säkerhet och klicka på "Öppna ändå".
 
-### Kontrollera grundnivån
+### Kontrollera tidmätningen
 
 Du är inte klar förrän det här stämmer:
 
@@ -73,20 +73,21 @@ Du är inte klar förrän det här stämmer:
    (Accessibility). Be användaren slå på den och starta om ActivityWatch.
 3. Webbläsaren: be användaren klicka i Safari eller Chrome och svara OK när macOS frågar om
    python3 får styra webbläsaren. Kör sedan `python3 ~/tidskoll/bin/webblasare.py --en-gang`
-   medan webbläsaren är aktiv. Den ska skriva ut en adress. Firefox stöds inte. Där finns i
-   stället ActivityWatchs eget tillägg aw-watcher-web.
+   medan webbläsaren är aktiv. Den ska skriva ut en adress. I Firefox loggas bara
+   fönstertiteln. Vill användaren ha adresser därifrån finns ActivityWatchs eget tillägg
+   aw-watcher-web.
 4. `launchctl print gui/$(id -u)/com.tidskoll.webblasare` visar `state = running`.
 5. `python3 ~/tidskoll/bin/veckorapport.py` skriver en fil utan fel (den är tom första dagen).
 
-## Blockeringen (bara om användaren sagt ja)
+## Blockering (bara om användaren sagt ja)
 
 Kör `bash installera.sh blockera`. Det kopierar `blockera.sh` till `~/tidskoll/bin/` och
 listan till `~/tidskoll/blocklista.txt`, men slår inte på något.
 
 Gå igenom listan med användaren först. Den innehåller video, sociala medier, forum och
 svenska nyhetssajter. Fråga vad hen behöver i jobbet. En sajt som används i arbetet ska inte
-blockeras. Där är det bättre att dölja flödet med ett tillägg som SocialFocus (se
-`minska-skarmtiden.md`). Sätt `#` framför det som inte ska med.
+blockeras. Där är det bättre att dölja flödet (delen Dölja flöden nedan, eller ett tillägg som
+SocialFocus för andra sajter än LinkedIn). Sätt `#` framför det som inte ska med.
 
 Slå på: `bash ~/tidskoll/bin/blockera.sh pa`. macOS visar en ruta där användaren skriver
 datorns lösenord. Be aldrig om lösenordet i chatten och skriv det aldrig någonstans.
@@ -118,7 +119,7 @@ rutan för att skriva inlägg ska det stå "Flödet är dolt." Har hen ett annat
 döljer flöden, till exempel SocialFocus, ska det stängas av för linkedin.com så att de inte
 krockar.
 
-## Skärmdumpsnivån (bara om användaren sagt ja)
+## Skärmdumpar (bara om användaren sagt ja)
 
 Kräver Xcode Command Line Tools. Kontrollera med `xcode-select -p`. Saknas de, kör
 `xcode-select --install` och vänta tills användaren klickat igenom installationen.
@@ -135,14 +136,11 @@ sig själva för bakgrundsprogram, så vänta inte på dem.
 
 Starta om skärmdumparna när behörigheterna är givna: `bash installera.sh fortsatt`.
 
-Fällor:
-- Bygg aldrig om appen efter att behörigheten getts. Den nya signaturen gör behörigheten
-  ogiltig. Måste den byggas om (`installera.sh skarm --bygg-om`): användaren tar bort
-  appen ur listan med minus och lägger till den igen.
-- `screencapture` vägrar skriva till filnamn som börjar med punkt, med samma felmeddelande
-  som när behörighet saknas. Skriptet undviker det redan.
+Bygg aldrig om appen efter att behörigheten getts. Den nya signaturen gör behörigheten
+ogiltig. Måste den byggas om (`installera.sh skarm --bygg-om`) tar användaren bort appen ur
+listan med minus och lägger till den igen.
 
-### Kontrollera skärmdumpsnivån
+### Kontrollera skärmdumparna
 
 1. `launchctl print gui/$(id -u)/com.tidskoll.skarm` visar `state = running`.
 2. Efter en halv minut finns minst en bild i `~/tidskoll/skarm/dagar/<idag>/`, mellan 15 och 500 kB.
@@ -166,4 +164,5 @@ Berätta för användaren:
 - Att `minska-skarmtiden.md` beskriver verktyg för telefonen och för sajter som inte går
   att blockera, som One Sec och Skärmtid.
 - Att den nedladdade mappen kan slängas. Status, paus och avinstallation sköts sedan med
-  `bash ~/tidskoll/bin/installera.sh status|paus|fortsatt|avinstallera`.
+  `bash ~/tidskoll/bin/installera.sh status|paus|fortsatt|avinstallera`. För att lägga till
+  en del senare behövs mappen igen.

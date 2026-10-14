@@ -1,9 +1,9 @@
 #!/bin/bash
 # Tidskoll — installation och styrning (macOS). Går att köra om, inget dubbleras.
 #
-#   bash installera.sh bas                  ActivityWatch, webbläsarbevakaren, veckorapporten
-#                                           och skillen tidskoll
-#   bash installera.sh skarm [--bygg-om]    skärmdumpar var femte sekund (valfri nivå)
+#   bash installera.sh bas                  tidmätning: ActivityWatch, webbläsarbevakaren,
+#                                           veckorapporten och skillen tidskoll
+#   bash installera.sh skarm [--bygg-om]    skärmdumpar var femte sekund (valfri)
 #   bash installera.sh blockera             blockering av sajter i alla webbläsare (valfri,
 #                                           slås på separat med ~/tidskoll/bin/blockera.sh pa)
 #   bash installera.sh floden               skript som döljer LinkedIn-flödet i Safari (valfri)
@@ -44,7 +44,7 @@ need_src() { [ -d "$SRC/bas" ] || fail "Installera från den nedladdade Tidskoll
 
 cmd_bas() {
   need_mac; need_src
-  say "▸ Tidskoll, grundnivån"
+  say "▸ Tidskoll, tidmätning"
 
   # 1. ActivityWatch
   if [ ! -d /Applications/ActivityWatch.app ]; then
@@ -170,7 +170,7 @@ cmd_status() {
 
 cmd_paus()     { launchctl bootout "$GUI/com.tidskoll.skarm" 2>/dev/null && ok "skärmdumparna pausade" || say "redan pausade"; }
 cmd_fortsatt() {
-  [ -f "$AGENTS/com.tidskoll.skarm.plist" ] || fail "skärmdumpsnivån är inte installerad"
+  [ -f "$AGENTS/com.tidskoll.skarm.plist" ] || fail "skärmdumparna är inte installerade"
   launchctl bootout "$GUI/com.tidskoll.skarm" 2>/dev/null || true
   launchctl bootstrap "$GUI" "$AGENTS/com.tidskoll.skarm.plist"
   ok "skärmdumparna igång"

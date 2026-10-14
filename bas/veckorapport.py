@@ -3,7 +3,7 @@
 
 Senaste sju dagarna jämfört med veckan innan: aktiv tid, tid per dag, per
 kategori med underkategorier, de mest använda apparna och sajterna, och om
-blockerade sajter ändå laddades. Är skärmdumpsnivån installerad kommer även
+blockerade sajter ändå laddades. Är skärmdumparna installerade kommer även
 fokusmått med (långa arbetspass, appbyten per timme).
 
 Allt räknas fram lokalt. Inget skickas någonstans.
@@ -27,7 +27,7 @@ sys.path.insert(0, str(HERE))
 import aw  # noqa: E402
 
 try:
-    import arbetspass  # noqa: E402  (skärmdumpsnivån, valfri)
+    import arbetspass  # noqa: E402  (finns bara om skärmdumparna är installerade)
 except Exception:
     arbetspass = None
 

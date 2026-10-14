@@ -1,6 +1,6 @@
 ---
 name: tidskoll
-description: Svara på hur användaren lägger sin tid vid datorn, utifrån Tidskoll (ActivityWatch-data, blockering av sajter och valfria skärmdumpar på den egna Macen). Använd vid "/tidskoll", "vart tog tiden vägen", "hur mycket tid la jag på X", "vad gjorde jag igår", "veckorapport", "kategorisera min tid", "vad kan jag effektivisera", "analysera min skärmtid", "pausa skärmdumparna", "blockera eller öppna en sajt", eller "tidskoll dag|vecka|kategorier|analysera|effektivisera|blockera|lyft|ater|status|paus|fortsatt".
+description: Svara på hur användaren lägger sin tid vid datorn, utifrån Tidskoll (tidmätning med ActivityWatch, blockering av sajter, dolda flöden i Safari och valfria skärmdumpar på den egna Macen). Använd vid "/tidskoll", "vart tog tiden vägen", "hur mycket tid la jag på X", "vad gjorde jag igår", "veckorapport", "kategorisera min tid", "vad kan jag effektivisera", "analysera min skärmtid", "pausa skärmdumparna", "blockera eller öppna en sajt", "LinkedIn-flödet syns igen", "dölj flödet på en sajt", eller "tidskoll dag|vecka|kategorier|analysera|effektivisera|blockera|lyft|ater|status|paus|fortsatt".
 ---
 
 # Tidskoll
@@ -63,7 +63,7 @@ ActivityWatch använder Rusts regexmotor, som skiljer sig från Pythons på två
 
 Tomma Safari-titlar uppstår medan en sida laddas. De går inte att kategorisera, så låt dem vara.
 
-## `analysera [datum]` (kräver skärmdumpsnivån; standard: igår om det finns data, annars idag)
+## `analysera [datum]` (kräver att skärmdumparna är installerade; standard: igår om det finns data, annars idag)
 
 Metadata först, bilder sedan. Mål: 10 till 30 bilder per dag, aldrig alla.
 Kan du inte öppna bildfiler: säg det, och gör analysen på loggen och tiden i steg 1 och 2.

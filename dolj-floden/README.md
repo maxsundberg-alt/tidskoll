@@ -1,4 +1,4 @@
-# Dölj flöden
+# Dölja flöden
 
 Skript som döljer flöden på sajter du behöver men inte vill fastna i. Sajten fungerar som
 vanligt i övrigt. De körs i Safari på Mac och iPhone med appen
@@ -13,7 +13,8 @@ Skripten påverkar bara webbsidorna i Safari. LinkedIns app på telefonen påver
 
 ## Så kommer skriptet igång
 
-Be din agent installera det, eller kör `bash installera.sh floden` i den nedladdade mappen.
+Be din agent installera det, eller kör `bash installera.sh floden` i den nedladdade
+Tidskoll-mappen.
 Skriptet läggs i mappen `Userscripts` i iCloud Drive, så att samma fil används på Mac och iPhone.
 Saknas iCloud Drive läggs det i `~/tidskoll/userscripts`.
 

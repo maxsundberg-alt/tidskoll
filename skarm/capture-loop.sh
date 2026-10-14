@@ -1,5 +1,5 @@
 #!/bin/bash
-# Tidskoll, skärmdumpsnivån (macOS). Tar en skärmdump och loggar app, fönster
+# Tidskoll, skärmdumpar (macOS). Tar en skärmdump och loggar app, fönster
 # och adress var femte sekund. Startas av launchd via Tidskoll.app (se wrapper.c:
 # behörigheten att spela in skärmen kräver en riktig app).
 #
@@ -15,36 +15,22 @@ IDLE_SKIP_SECS=90       # ingen skärmdump om tangentbord och mus varit orörda 
 RETAIN_DAYS=30          # dagsmappar (bilder och logg) äldre än så raderas, anteckningarna sparas
 WIDTH=1568              # bredare än så har AI-modeller ingen nytta av
 WEBP_QUALITY=35         # ger 40–60 kB per bild med läsbar text
-JPEG_QUALITY=55         # när varken cwebp eller ffmpeg med webp finns
+JPEG_QUALITY=55         # när cwebp saknas
 
-# launchd ärver inte skalets PATH, så programmen letas upp med fullständiga sökvägar.
-# Ordning: cwebp (minst, runt 40 kB) → ffmpeg med webp-stöd → sips som JPEG (finns alltid
-# på macOS, 150–230 kB). Många ffmpeg-installationer från Homebrew saknar webp-stöd,
-# så det kontrolleras i stället för att antas.
+# launchd ärver inte skalets PATH, så cwebp letas upp med fullständiga sökvägar.
+# cwebp (installeras med Homebrew) ger runt 40 kB per bild. Saknas det används macOS
+# egen sips och JPEG, som ger 150–230 kB.
 CWEBP=""
 for c in "$(command -v cwebp 2>/dev/null)" /opt/homebrew/bin/cwebp /usr/local/bin/cwebp; do
   [ -n "$c" ] && [ -x "$c" ] && CWEBP="$c" && break
 done
-FFMPEG=""
-for c in "$(command -v ffmpeg 2>/dev/null)" /opt/homebrew/bin/ffmpeg /usr/local/bin/ffmpeg; do
-  [ -n "$c" ] && [ -x "$c" ] && FFMPEG="$c" && break
-done
-FFMPEG_WEBP=""
-if [ -n "$FFMPEG" ] && "$FFMPEG" -hide_banner -encoders 2>/dev/null | grep -q webp; then
-  FFMPEG_WEBP=1
-fi
 
-# Komprimera en PNG till det minsta läsbara format som finns. Skriver ut sökvägen
+# Komprimera en PNG till WebP, eller JPEG om cwebp saknas. Skriver ut sökvägen
 # till den nya filen, eller ingenting om det misslyckas.
 encode_frame() {
   # $1 = PNG-källfil, $2 = målmapp, $3 = tidsstämpel
   if [ -n "$CWEBP" ]; then
     if "$CWEBP" -quiet -q "$WEBP_QUALITY" -resize "$WIDTH" 0 "$1" -o "$2/$3.webp" 2>>"$BASE/daemon.log"; then
-      printf '%s' "$2/$3.webp"; return 0
-    fi
-  fi
-  if [ -n "$FFMPEG_WEBP" ]; then
-    if "$FFMPEG" -y -loglevel error -i "$1" -vf "scale=$WIDTH:-2" -quality "$WEBP_QUALITY" "$2/$3.webp" 2>>"$BASE/daemon.log"; then
       printf '%s' "$2/$3.webp"; return 0
     fi
   fi

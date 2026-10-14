@@ -19,7 +19,7 @@
 
   {"name": ["Privat"], "rule": {"type": "none"}, "data": {"color": "#9b59b6"}},
   {"name": ["Privat", "Ekonomi"], "rule": {"type": "regex", "regex": "Avanza|Swedbank|Nordea|Handelsbanken|seb\\.se|Länsförsäkringar|ICA Banken|Klarna|Skatteverket", "ignore_case": true}, "data": {"color": "#8e44ad"}},
-  {"name": ["Privat", "Foton"], "rule": {"type": "regex", "regex": "^Photos$|^Bilder$|Photo Booth|^Preview$|^Förhandsvisning$", "ignore_case": false}, "data": {"color": "#a569bd"}},
+  {"name": ["Privat", "Foton"], "rule": {"type": "regex", "regex": "^Photos$|^Bilder$|Photo Booth", "ignore_case": false}, "data": {"color": "#a569bd"}},
 
   {"name": ["Konsumtion"], "rule": {"type": "none"}, "data": {"color": "#b03a3a"}},
   {"name": ["Konsumtion", "Sociala medier"], "rule": {"type": "regex", "regex": "Instagram|TikTok|Facebook|Snapchat|Reddit|Pinterest|Threads|Flashback", "ignore_case": false}, "data": {"color": "#d24b4b"}},
